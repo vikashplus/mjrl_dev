@@ -1,0 +1,23 @@
+{
+    'job_name': Ref('env_name') + '-sim',
+    'env_name': 'dclaw3mx_track-v0',
+    'exp_notes': 'This is an example job data file.',
+    'niter': 2,
+    'init_std': [-0.5, 0.0],
+    'gamma': 0.995,
+    'gae_lambda': 0.97,
+    'FIM_invert_args': {
+        'mode':'cg',
+        'iters':10,
+        'regu_type':'direct',
+        'damping':1e-4,
+    },
+    'normalized_step_size': 0.05,
+    'seed': 100,
+    'sample_mode': 'trajectories',
+    'num_traj': 10,
+    'num_cpu': 2,
+    'save_freq': 1,
+    'evaluation_rollouts': 10,
+    'save_logs': True,
+}

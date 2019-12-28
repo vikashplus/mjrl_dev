@@ -1,0 +1,27 @@
+name: mjrl
+channels:
+- pytorch
+- defaults
+dependencies:
+- python=3.5
+- jupyter=1.0.0
+- mkl-service=1.1.2
+- pytorch=0.3.1
+- pytorch-cpu=0.3.1
+- tabulate=0.7.5
+- termcolor
+- torchvision=0.2.0
+- pip:
+  - click
+  - gym==0.9.3
+  - ipdb==0.11
+  - matplotlib==2.1.2
+  - mujoco-py==1.50.1.35
+  - pip==18.0
+  - pyyaml==3.12
+  - tqdm==4.25.0
+  - wheel==0.30.0
+  - scipy==1.0.0
+  - tensorflow==1.11.0
+  - tensorboardX==1.4
+  - git+git://github.com/deepmind/dm_control.git
