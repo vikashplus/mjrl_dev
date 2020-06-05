@@ -24,17 +24,12 @@ from mjrl.policies.gaussian_mlp import MLP
 from mjrl.baselines.mlp_baseline import MLPBaseline
 # Algos
 from mjrl.algos.npg_cg import NPG
-# Environments
-import robel
-import MPL
-# import deepmimic.envs
-# import aparo.envs
 
 # from adept_envs.utils.tensorboard import tensorboard
 # parallel job execution
 import multiprocessing as mp
 
-from telecom.notification import send_message
+from vtils.telecom.notification import send_message
 
 
 # Import shared framework utils.
@@ -89,7 +84,7 @@ def single_process(job):
         # NOTE: if the log std is too small 
         # (say <-2.0, it is problem dependent and intuition should be used)
         # then we need to bump it up so that it explores
-        loaded_params[-policy.m:] += 1.0
+        loaded_params[-policy.m:] += job['init_std']
         policy.set_param_values(loaded_params)
         del job['init_policy']
 
@@ -133,7 +128,6 @@ def single_process(job):
           'took %f seconds ==============' % total_job_time)
     return total_job_time
 
-
 def product_dict(**kwargs):
     keys = kwargs.keys()
     vals = kwargs.values()
@@ -154,6 +148,9 @@ def main():
     # Get the config files, expanding globs and directories (*) if necessary.
     # jobs = config_reader.process_config_files(args.config)
     # assert jobs, 'No jobs found from config.'
+
+    if args.include:
+        exec("import "+args.include)
 
     # Scan job sets
     job_set = []

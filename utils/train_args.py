@@ -56,4 +56,6 @@ def get_args(parser=None):
         'Send sms about job progress and completion to provided sms gateway.\
          Find your SMS gateway here -- https://en.wikipedia.org/wiki/SMS_gateway'
     ))
+    parser.add_argument('-i', '--include', type=str, default=None, help='task suite to import')
+    
     return parser.parse_args()
