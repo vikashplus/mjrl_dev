@@ -64,4 +64,10 @@ def get_args(parser=None):
     parser.add_argument('--calibration_mode', action='store_true', help=(
         'Disengage the motors for calibration measurement.'
     ))
+    parser.add_argument('-i', '--include', default='', help=(
+        'task suite to import'
+    ))
+    parser.add_argument('-d', '--seed', default=123, type=int, help=(
+        'random number seed'
+    ))
     return parser.parse_args()
