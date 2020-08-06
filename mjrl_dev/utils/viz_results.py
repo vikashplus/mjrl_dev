@@ -71,16 +71,20 @@ def main():
         '-l', '--label', action='append', nargs='?', help='job group label')
     parser.add_argument(
         '-s', '--smooth', type=int, default=101, help='window for smoothing')
+    parser.add_argument(
+        '-u', '--user', type=str, default=None, help='User defined field from log')
     args = parser.parse_args()
 
     # Prepare plots
     fig = plt.figure()
-    ax1 = fig.add_subplot(3, 2, 1)
-    ax2 = fig.add_subplot(3, 2, 2)
-    ax3 = fig.add_subplot(3, 2, 3)
-    ax4 = fig.add_subplot(3, 2, 4)
-    ax40 = ax4.twinx()
-    ax5 = fig.add_subplot(3, 1, 3)
+    ax1 = fig.add_subplot(4, 2, 1)
+    ax2 = fig.add_subplot(4, 2, 2)
+    ax3 = fig.add_subplot(4, 2, 3)
+    ax4 = fig.add_subplot(4, 2, 4)
+    ax5 = fig.add_subplot(4, 2, 5)
+    ax6 = fig.add_subplot(4, 2, 6)
+    ax7 = fig.add_subplot(4, 2, 8)
+    ax8 = fig.add_subplot(4, 2, 7)
     results_info = ''
 
     # scan labels
@@ -102,63 +106,72 @@ def main():
         for i, exp_path in enumerate(exp_dir):
             job = get_job_data(exp_path + '/job_data.txt')
             log = get_log(exp_path + '/logs/log.csv')
+            epochs = np.arange(len(log['stoc_pol_mean']))
+            samples = np.cumsum(log['num_samples']) #epochs * job['num_traj'] * job['horizon']
+            # rewards
+            reward = smooth_data(log['stoc_pol_mean'], window_length=args.smooth)/job['horizon']
+            ax1.plot(epochs, reward, label=job['job_name'], linewidth=2)
+            ax7.plot(samples, reward, label=job['job_name'], linewidth=2)
+            
+            # score
+            score = smooth_data(log['eval_score'], window_length=args.smooth)/job['horizon']
+            ax3.plot(epochs, score, label=job['job_name'], linewidth=2)
 
-            reward = smooth_data(
-                log['stoc_pol_mean'], window_length=args.smooth)
+            # Success percentage
             try:
-                eval_s = log['success_rate']
+                succ_p = smooth_data(log['success_rate'], window_length=args.smooth)
             except ValueError as e:
-                eval_s = np.ones(len(reward))
-            succ_p = np.abs(np.around(eval_s / 1000000, decimals=2))
-            score = (eval_s / abs(eval_s+1e-6)) * (abs(eval_s) - succ_p * 1000000)
-            succ_p = smooth_data(succ_p, window_length=args.smooth)
-            score = smooth_data(score, window_length=args.smooth)
-            epochs = np.arange(len(reward))
-            samples = epochs * job['num_traj'] * job['horizon']
-            exp_info = '%30s   %3d   %+1.2f     %3d    %0.3f    %+.2f    %+.2f    %.1f%%' % (job['job_name'], job['seed'], \
-                job['init_std'], job['num_traj'], job['gamma'], reward[-1], score[-1], succ_p[-1])
-            print(exp_info)
-            results_info = results_info + exp_info + '\n'
+                succ_p = np.zeros(len(reward))
+            ax5.plot(epochs, succ_p, label=job['job_name'], linewidth=2)
+            
+            # user
+            if args.user is not None:
+                try:
+                    user = smooth_data(log[args.user], window_length=args.smooth)
+                except:
+                    print("%s not found"%args.user)
+                    user = np.nan*epochs
+                # user = log['time_sampling']+log['time_vpg']+log['time_npg']
+                ax8.plot(epochs, user, label=job['job_name'], linewidth=2)
 
-            l1 = ax1.plot(epochs, reward, label=job['job_name'], linewidth=2)
-            l1 = ax3.plot(epochs, score, label=job['job_name'], linewidth=2)
-            l2 = ax5.plot(samples, reward, label=job['job_name'], linewidth=2)
+
+            # gather stats 
             if sum_reward is not None:
                 sum_reward_min_length = min(len(sum_reward), len(score))
-                sum_reward = sum_reward[:
-                                        sum_reward_min_length] + reward[:
-                                                                        sum_reward_min_length]
-                sum_score = sum_score[:
-                                      sum_reward_min_length] + score[:
-                                                                     sum_reward_min_length]
-                sum_succ_p = sum_succ_p[:
-                                        sum_reward_min_length] + succ_p[:
-                                                                        sum_reward_min_length]
+                sum_reward = sum_reward[:sum_reward_min_length] + reward[:sum_reward_min_length]
+                sum_score = sum_score[:sum_reward_min_length] + score[:sum_reward_min_length]
+                sum_succ_p = sum_succ_p[:sum_reward_min_length] + succ_p[:sum_reward_min_length]
             else:
                 sum_reward = reward
                 sum_score = score
                 sum_succ_p = succ_p
                 sum_reward_min_length = len(sum_reward)
+            
+            # gather records 
+            exp_info = '%30s   %3d   %+1.2f     %3d    %0.3f    %+.2f    %+.2f    %.1f%%' % (job['job_name'], job['seed'], \
+                job['init_std'], job['num_traj'], job['gamma'], reward[-1], score[-1], succ_p[-1])
+            print(exp_info)
+            results_info = results_info + exp_info + '\n'
 
+        # stats
         mean_reward = sum_reward[:sum_reward_min_length] / len(exp_dir)
         mean_score = sum_score[:sum_reward_min_length] / len(exp_dir)
         mean_succ_p = sum_succ_p[:sum_reward_min_length] / len(exp_dir)
         ax2.plot(mean_reward, label='g' + str(iexp) + ':' + args.label[iexp])
         ax4.plot(mean_score, label='g' + str(iexp) + ':score')
-        ax40.plot(
-            mean_succ_p, alpha=.4, label='g' + str(iexp) + ':' + 'success%')
+        ax6.plot(mean_succ_p, label='g' + str(iexp) + ':' + 'success%')
         group_stats = "Group stats: <mean reward %+.2f>, <mean score %+.2f>, <mean success %+.1f>" % \
          (mean_reward[-1], mean_score[-1], mean_succ_p[-1],)
         print(group_stats, end='\n\n')
         results_info = results_info + group_stats + '\n\n'
 
     # Format visuals
-    ax1.set_ylabel('rewards')
+    ax1.set_ylabel('rewards/H')
     ax1.legend(fontsize='x-small')
     ax1.yaxis.tick_right()
     ax1.axes.xaxis.set_ticklabels([])
 
-    ax2.set_ylabel('mean rewards')
+    ax2.set_ylabel('mean rewards/H')
     ax2.yaxis.tick_right()
     ax2.legend()
     ax2.set_xlim(ax1.get_xlim())
@@ -166,23 +179,36 @@ def main():
     ax2.legend(fontsize='x-small')
     ax2.axes.xaxis.set_ticklabels([])
 
-    ax3.set_ylabel('score')
+    ax3.set_ylabel('score/H')
     ax3.yaxis.tick_right()
-    ax3.set_xlabel('#epochs')
+    ax3.set_xlim(ax1.get_xlim())
 
-    ax4.set_ylabel('mean score')
+    ax4.set_ylabel('mean score/H')
     ax4.yaxis.tick_right()
-    ax4.set_xlabel('#epochs')
     ax4.set_xlim(ax1.get_xlim())
-    ax4.legend(fontsize='x-small', loc='lower center')
-    ax40.legend(fontsize='x-small', loc='lower right')
-    ax40.tick_params(axis='y', colors='grey')
-    ax40.set_ylim([-5, 105])
-    ax40.set_yticks([0, 100])
+    ax4.set_ylim(ax3.get_ylim())
+    ax4.legend(fontsize='x-small')
 
-    ax5.set_xlabel('#samples')
-    ax5.set_ylabel('rewards')
+    ax5.set_ylabel('success')
     ax5.yaxis.tick_right()
+    ax5.set_xlim(ax1.get_xlim())
+    ax5.set_ylim([-5, 105])
+    ax5.set_xlabel('#epochs')
+
+    ax6.set_ylabel('mean success')
+    ax6.legend(fontsize='x-small')
+    ax6.set_xlim(ax1.get_xlim())
+    ax6.set_ylim(ax5.get_ylim())
+    ax6.yaxis.tick_right()
+    ax6.set_xlabel('#epochs')
+
+    ax7.set_xlabel('#samples')
+    ax7.set_ylabel('rewards')
+    ax7.yaxis.tick_right()
+
+    ax8.set_xlabel('#epochs')
+    ax8.set_ylabel(args.user)
+    ax8.yaxis.tick_right()
 
     plt.tight_layout()
     plt.show()

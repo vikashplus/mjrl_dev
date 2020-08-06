@@ -57,5 +57,6 @@ def get_args(parser=None):
          Find your SMS gateway here -- https://en.wikipedia.org/wiki/SMS_gateway'
     ))
     parser.add_argument('-i', '--include', type=str, default=None, help='task suite to import')
+    parser.add_argument('-u', '--upload', type=str, default=None, help='Upload to s3/ gcp')
     
     return parser.parse_args()

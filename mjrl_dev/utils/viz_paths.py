@@ -25,15 +25,15 @@ def plot_horizon_distribution(paths, e, fileName_prefix=None):
                 '-',
                 label=('time=%1.2f' % horizon[i]))
         h1 = plt.plot(
-            np.array([0, horizon[0]]),
+            np.array([0, max(horizon)]),
             rl_dt_ideal * np.ones(2),
-            'g',
-            linewidth=5.0)
+            'g', alpha=.5,
+            linewidth=2.0)
 
         plt.legend([h1[0]], ['ideal'], loc='upper right')
         plt.ylabel('time step (sec)')
         plt.xlabel('time (sec)')
-        plt.ylim(rl_dt_ideal - 0.005, rl_dt_ideal + .045)
+        plt.ylim(rl_dt_ideal - 0.005, rl_dt_ideal + .005)
         plt.suptitle('Timestep profile for %d rollouts' % len(paths))
 
         file_name = fileName_prefix + '_timesteps.pdf'
@@ -42,10 +42,9 @@ def plot_horizon_distribution(paths, e, fileName_prefix=None):
 
         # plot horizon
         plt.clf()
-        rl_steps = len(paths[0]['env_infos']['time'])
         h1 = plt.plot(
             np.array([0, len(paths)]),
-            rl_steps * rl_dt_ideal * np.ones(2),
+            e.horizon * rl_dt_ideal * np.ones(2),
             'g',
             linewidth=5.0,
             label='ideal')
@@ -60,7 +59,7 @@ def plot_horizon_distribution(paths, e, fileName_prefix=None):
         print("Saved:", file_name)
 
 
-def plot_paths(paths, e, fileName_prefix=''):
+def plot_paths(paths, e=None, fileName_prefix=''):
     import matplotlib as mpl
     mpl.use('Agg')
     import matplotlib.pyplot as plt
@@ -110,13 +109,13 @@ def plot_paths(paths, e, fileName_prefix=''):
             plt.ylabel('score')
             ax.yaxis.tick_right()
 
-        if "rewards" in path['env_infos']:
+        if "rwd_dict" in path['env_infos']:
             ax = plt.subplot(nplt2, 2, 4)
             ax.set_prop_cycle(None)
-            for key in sorted(path['env_infos']['rewards'].keys()):
+            for key in sorted(path['env_infos']['rwd_dict'].keys()):
                 plt.plot(
                     path['env_infos']['time'],
-                    path['env_infos']['rewards'][key],
+                    path['env_infos']['rwd_dict'][key],
                     label=key)
             plt.legend(
                 loc='upper left',

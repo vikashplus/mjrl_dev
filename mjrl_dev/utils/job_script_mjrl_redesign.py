@@ -117,7 +117,8 @@ def single_process(job):
         gae_lambda=job['gae_lambda'],
         num_cpu=job['num_cpu'],
         sample_mode=job['sample_mode'],
-        num_samples=job.get('num_traj') or job.get('num_samples'),
+        num_traj=job.get('num_traj'),
+        num_samples=job.get('num_samples'),
         evaluation_rollouts=job['evaluation_rollouts'],
         save_freq=job['save_freq'],
         plot_keys={'stoc_pol_mean', 'stoc_pol_std'},
@@ -246,18 +247,24 @@ def main():
                 traceback.print_exc()
 
     t2 = timer.time()
-    notify_user(jobs[0]['job_name'] + "finished", "Total time taken = %f sec" %(t2-t1))
-    print('Total time taken = ', t2 - t1)
 
     # Send notifcation to the user
-    msg_subject = job['job_name'] + ' completed'
-    msg_body = 'Total time taken = %f' % (t2 - t1)
-    msg_body += ":: CPU-" + str(psutil.cpu_percent()) + str(psutil.virtual_memory())
+    msg_subject = "{}:: {} finished".format(os.uname()[1], jobs[0]['job_name'])
+    msg_body = 'Total time taken = %f sec' % (t2 - t1)
+    # msg_body += ":: CPU-" + str(psutil.cpu_percent()) + str(psutil.virtual_memory())
 
+    print(msg_subject + ": " + msg_body)
     if args.email:
         send_message(args.email, msg_subject, msg_body)
     if args.sms:
         send_message(args.sms, msg_subject, msg_body)
+
+    # Upload to S3 buckets 
+    if args.upload=='s3':
+        print("Uploading Project folder to S3")
+        os.system("aws s3 sync ~/Projects/r3l/ s3://r3l/")
+        print("Stopping instance")
+        os.system("sudo shutdown -h now")
     return
 
 
