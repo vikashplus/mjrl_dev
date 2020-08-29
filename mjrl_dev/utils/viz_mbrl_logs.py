@@ -10,14 +10,10 @@ import pandas
 
 
 def get_log(filename):
-
-    data = pandas.read_csv(filename)
-
-    # try:
-    #     # data = np.genfromtxt(filename, dtype=float, delimiter=',', names=True)
-    #     data = pandas.csv_read(filename)
-    # except Exception as e:
-    #     print("WARNING: %s not found." % filename)
+    try:
+        data = pandas.read_csv(filename)
+    except Exception as e:
+        print("WARNING: %s not found." % filename)
     return data
 
 
