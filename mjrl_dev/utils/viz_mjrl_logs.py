@@ -109,12 +109,13 @@ def main():
             epochs = np.arange(len(log['stoc_pol_mean']))
             samples = np.cumsum(log['num_samples']) #epochs * job['num_traj'] * job['horizon']
             # rewards
-            reward = smooth_data(log['stoc_pol_mean'], window_length=args.smooth)/job['horizon']
+            reward = smooth_data(log['stoc_pol_mean'], window_length=args.smooth)/job['horizon'] # termination penalties provides rewards for path beyong termination
             ax1.plot(epochs, reward, label=job['job_name'], linewidth=2)
             ax7.plot(samples, reward, label=job['job_name'], linewidth=2)
             
             # score
-            score = smooth_data(log['eval_score'], window_length=args.smooth)/job['horizon']
+            # score = smooth_data(log['score'], window_length=args.smooth)/log['num_samples'] # no termination penalties, hence normalized by samples
+            score = smooth_data(log['score'], window_length=args.smooth) # score/step is returned
             ax3.plot(epochs, score, label=job['job_name'], linewidth=2)
 
             # Success percentage
