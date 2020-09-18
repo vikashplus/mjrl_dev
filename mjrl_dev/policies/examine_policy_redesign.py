@@ -15,7 +15,7 @@ from mjrl.policies.gaussian_mlp import MLP
 # import mjrl.samplers.base_sampler as base_sampler
 from mjrl.samplers.core import do_rollout
 from mjrl_dev.utils.viz_paths import plot_horizon_distribution, plot_paths
-
+import numpy as np
 
 def main():
     # See evaluate_args.py for the list of args.
@@ -47,7 +47,7 @@ def main():
     policy = args.policy
     mode = args.mode
     if args.policy == "":
-        pol = MLP(e.spec, init_log_std=-.50)
+        pol = MLP(e.spec, init_log_std=0.0)
         mode = "exploration"
         policy = "random_policy.pickle"
 
@@ -85,20 +85,17 @@ def main():
             base_seed=args.seed)
 
         # Policy stats
-        succ_p = e.env.env.evaluate_success(paths)
-        mean_reward = 0
-        mean_score = 0
-        stats = ''
-        # for ipath, path in enumerate(paths):
-        #     mean_reward += path['env_infos']['rwd_dict']['total'][-1]
-        #     mean_score += path['env_infos']['score'][-1]
-        #     stats = stats + "path%d:: <reward: %+.3f>, <score: %+.3f>\n" % (
-        #         ipath, path['env_infos']['rwd_dict']['total'][-1], path['env_infos']['score'][-1])
-        # mean_reward = mean_reward / len(paths)
-        # mean_score = mean_score / len(paths)
-        # stats += "Policy stats:: <mean reward: %+.3f>, <mean score: %+.3f>, <mean success: %2.1f%%>\n" % (
-        #     mean_reward, mean_score, succ_p)
-        # print(stats)
+        eval_success = e.env.env.evaluate_success(paths)
+        eval_rewards = np.mean([np.sum(p['env_infos']['rwd_dict']['total']) for p in paths])/e.horizon
+        eval_score = np.mean([np.sum(p['env_infos']['score'])/len(p['env_infos']['score']) for p in paths])
+        # evaluate_success = np.mean([np.sum(p['env_infos']['rwd_dict']['total']) for p in paths])
+
+        stats = "Policy stats:: <mean reward/step: %+.3f>, <mean score/step: %+.3f>, <mean success: %2.1f%%>\n" % (
+            eval_rewards, eval_score, eval_success)
+        for ipath, path in enumerate(paths):
+            stats = stats + "path%d:: <reward[-1]: %+.3f>, <score[-1]: %+.3f>\n" % (
+                ipath, path['env_infos']['rwd_dict']['total'][-1], path['env_infos']['score'][-1])
+        print(stats)
 
         # save to a file
         file_name = policy[:-7] + '_stats.txt'
