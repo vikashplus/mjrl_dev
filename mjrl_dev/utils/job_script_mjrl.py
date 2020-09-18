@@ -14,7 +14,9 @@ os.environ['MKL_THREADING_LAYER'] = 'GNU'
 
 # Utilities
 import train_args
-from train_loop import train_loop
+# from train_loop import train_loop
+from mjrl.utils.train_agent import train_agent
+
 from mjrl.utils.gym_env import GymEnv
 # Policies
 from mjrl.policies.gaussian_mlp import MLP
@@ -22,16 +24,12 @@ from mjrl.policies.gaussian_mlp import MLP
 from mjrl.baselines.mlp_baseline import MLPBaseline
 # Algos
 from mjrl.algos.npg_cg import NPG
-# Environments
-import robel
-import deepmimic.envs
-import aparo.envs
 
 # from adept_envs.utils.tensorboard import tensorboard
 # parallel job execution
 import multiprocessing as mp
 
-from robel_dev.utils.notification import send_message
+from vtils.telecom.notification import send_message
 
 
 # Import shared framework utils.
@@ -86,7 +84,7 @@ def single_process(job):
         # NOTE: if the log std is too small 
         # (say <-2.0, it is problem dependent and intuition should be used)
         # then we need to bump it up so that it explores
-        loaded_params[-policy.m:] += 1.0
+        loaded_params[-policy.m:] += job['init_std']
         policy.set_param_values(loaded_params)
         del job['init_policy']
 
@@ -109,17 +107,18 @@ def single_process(job):
         FIM_invert_args=job['FIM_invert_args'])
 
     # Train Agent
-    train_loop(
+    train_agent(
         job_name=job['job_name'],
         agent=agent,
-        save_dir=job_dir,
+        # save_dir=job_dir,
         seed=job['seed'],
         niter=job['niter'],
         gamma=job['gamma'],
         gae_lambda=job['gae_lambda'],
         num_cpu=job['num_cpu'],
         sample_mode=job['sample_mode'],
-        num_samples=job.get('num_traj') or job.get('num_samples'),
+        num_traj=job.get('num_traj'),
+        num_samples=job.get('num_samples'),
         evaluation_rollouts=job['evaluation_rollouts'],
         save_freq=job['save_freq'],
         plot_keys={'stoc_pol_mean', 'stoc_pol_std'},
@@ -129,7 +128,6 @@ def single_process(job):
     print('Job', job['job_name'],
           'took %f seconds ==============' % total_job_time)
     return total_job_time
-
 
 def product_dict(**kwargs):
     keys = kwargs.keys()
@@ -151,6 +149,9 @@ def main():
     # Get the config files, expanding globs and directories (*) if necessary.
     # jobs = config_reader.process_config_files(args.config)
     # assert jobs, 'No jobs found from config.'
+
+    if args.include:
+        exec("import "+args.include)
 
     # Scan job sets
     job_set = []
@@ -240,24 +241,30 @@ def main():
             try:
                 time_taken = single_process(job)
             except Exception as e:
-                notify_user("exception thrown in "+jobs['job_name'], str(e))
+                notify_user("exception thrown in "+jobs[0]['job_name'], str(e))
                 print('exception thrown')
                 print(str(e))
                 traceback.print_exc()
 
     t2 = timer.time()
-    notify_user(jobs[0]['job_name'] + "finished", "Total time taken = %f sec" %(t2-t1))
-    print('Total time taken = ', t2 - t1)
 
     # Send notifcation to the user
-    msg_subject = job['job_name'] + ' completed'
-    msg_body = 'Total time taken = %f' % (t2 - t1)
-    msg_body += ":: CPU-" + str(psutil.cpu_percent()) + str(psutil.virtual_memory())
+    msg_subject = "{}:: {} finished".format(os.uname()[1], jobs[0]['job_name'])
+    msg_body = 'Total time taken = %f sec' % (t2 - t1)
+    # msg_body += ":: CPU-" + str(psutil.cpu_percent()) + str(psutil.virtual_memory())
 
+    print(msg_subject + ": " + msg_body)
     if args.email:
         send_message(args.email, msg_subject, msg_body)
     if args.sms:
         send_message(args.sms, msg_subject, msg_body)
+
+    # Upload to S3 buckets 
+    if args.upload=='s3':
+        print("Uploading Project folder to S3")
+        os.system("aws s3 sync ~/Projects/r3l/ s3://r3l/")
+        print("Stopping instance")
+        os.system("sudo shutdown -h now")
     return
 
 
