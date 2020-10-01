@@ -53,9 +53,12 @@ def smooth_data(y, window_length=101, polyorder=3):
     return signal.savgol_filter(y, window_length, polyorder)
 
 
-def plot_mbrl_logs(log, job, job_name, smooth, user):
+def plot_mxrl_logs(log, job, job_name, smooth, user):
         # x axis
-        epochs = log['iteration']
+        if 'iteration' in log.keys():
+            epochs = log['iteration']
+        else:
+            epochs = range(len(log))
         samples = np.cumsum(log['num_samples'])
         horizon = job['horizon']
 
@@ -156,7 +159,7 @@ def main():
             else:
                 job_name = args.label[iexp]#+str(i)
 
-            plot_mbrl_logs(log, job, job_name, args.smooth, args.user)
+            plot_mxrl_logs(log, job, job_name, args.smooth, args.user)
     show_plot()
 
 if __name__ == '__main__':

@@ -80,7 +80,10 @@ def plot_mbrl_logs(log, job, job_name, smooth, user):
         plot(xdata=epochs, ydata=smooth_data(log['rollout_score'], smooth)/horizon, legend=job_name+' train', subplot_id=(3, 2, 2), fig_name='MBRL', plot_name="Policy's Reward/ step", color=job_color, linestyle='--', linewidth=1.5)
 
         # Policy's success rate
-        plot(xdata=epochs, ydata=smooth_data(log['eval_metric'], smooth), legend=job_name+' eval', subplot_id=(3, 2, 4), fig_name='MBRL', plot_name="Policy's success", linewidth=4)
+        try:
+            plot(xdata=epochs, ydata=smooth_data(log['eval_metric'], smooth), legend=job_name+' eval', subplot_id=(3, 2, 4), fig_name='MBRL', plot_name="Policy's success", linewidth=4)
+        except:
+            pass
         plot(xdata=epochs, ydata=smooth_data(log['rollout_metric'], smooth), legend=job_name+' train', subplot_id=(3, 2, 4), fig_name='MBRL', plot_name="Policy's success", color=job_color, linestyle='--', linewidth=1.5)
 
 
