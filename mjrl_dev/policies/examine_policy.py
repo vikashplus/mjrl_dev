@@ -86,15 +86,20 @@ def main():
 
         # Policy stats
         eval_success = e.env.env.evaluate_success(paths)
-        eval_rewards = np.mean([np.sum(p['env_infos']['rwd_dict']['total']) for p in paths])/e.horizon
-        eval_score = np.mean([np.sum(p['env_infos']['score'])/len(p['env_infos']['score']) for p in paths])
-        # evaluate_success = np.mean([np.sum(p['env_infos']['rwd_dict']['total']) for p in paths])
+        try:
+            eval_rewards = np.mean([np.sum(p['env_infos']['reward']) for p in paths])/e.horizon
+            eval_score = np.mean([np.mean(p['env_infos']['score']) for p in paths])
+        except:
+            eval_rewards = np.mean([np.sum(p['env_infos']['rwd_dense']) for p in paths])/e.horizon
+            eval_score = np.mean([np.mean(p['env_infos']['rwd_sparse']) for p in paths])
+
+        evaluate_success = np.mean([np.sum(p['env_infos']['solved']) for p in paths])
 
         stats = "Policy stats:: <mean reward/step: %+.3f>, <mean score/step: %+.3f>, <mean success: %2.1f%%>\n" % (
             eval_rewards, eval_score, eval_success)
         for ipath, path in enumerate(paths):
             stats = stats + "path%d:: <reward[-1]: %+.3f>, <score[-1]: %+.3f>\n" % (
-                ipath, path['env_infos']['rwd_dict']['total'][-1], path['env_infos']['score'][-1])
+                ipath, path['env_infos']['rwd_dense'][-1], path['env_infos']['rwd_sparse'][-1])
         print(stats)
 
         # save to a file
@@ -127,7 +132,7 @@ def main():
                 filename=args.filename)
 
     # Close envs
-    e.env.env.close_env()
+    # e.env.env.close_env()
 
 
 if __name__ == '__main__':
