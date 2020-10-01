@@ -57,7 +57,10 @@ def smooth_data(y, window_length=101, polyorder=3):
     # if window not off
     if window_length % 2 == 0:
         window_length = window_length + 1
-    return signal.savgol_filter(y, window_length, polyorder)
+    try:
+        return signal.savgol_filter(y, window_length, polyorder)
+    except:
+        return y
 
 
 # MAIN =========================================================
@@ -73,6 +76,8 @@ def main():
         '-s', '--smooth', type=int, default=101, help='window for smoothing')
     parser.add_argument(
         '-u', '--user', type=str, default=None, help='User defined field from log')
+    parser.add_argument(
+        '-x', '--xlim', type=str, default=None, help='max xlimit')
     args = parser.parse_args()
 
     # Prepare plots
@@ -115,7 +120,10 @@ def main():
             
             # score
             # score = smooth_data(log['score'], window_length=args.smooth)/log['num_samples'] # no termination penalties, hence normalized by samples
-            score = smooth_data(log['score'], window_length=args.smooth) # score/step is returned
+            if 'score' in log.dtype.names:
+                score = smooth_data(log['score'], window_length=args.smooth) # score/step is returned
+            else:
+                score = np.zeros_like(reward)
             ax3.plot(epochs, score, label=job['job_name'], linewidth=2)
 
             # Success percentage
@@ -170,7 +178,10 @@ def main():
     ax1.set_ylabel('rewards/H')
     ax1.legend(fontsize='x-small')
     ax1.yaxis.tick_right()
-    ax1.axes.xaxis.set_ticklabels([])
+    # ax1.axes.xaxis.set_ticklabels([])
+    if args.xlim:
+        ax1.set_xlim(eval(args.xlim))
+
 
     ax2.set_ylabel('mean rewards/H')
     ax2.yaxis.tick_right()
@@ -209,6 +220,7 @@ def main():
 
     ax8.set_xlabel('#epochs')
     ax8.set_ylabel(args.user)
+    ax8.set_xlim(ax1.get_xlim())
     ax8.yaxis.tick_right()
 
     plt.tight_layout()
