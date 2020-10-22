@@ -8,50 +8,7 @@ import argparse
 from scipy import signal
 import pandas
 import glob
-
-def get_file(search_path, file_name):
-    filename = glob.glob(search_path+"/*/**"+file_name)
-    assert (len(filename) > 0), "No file found at: {}".format(search_path+"/*/**"+file_name)
-    assert (len(filename) == 1), "Multiple files found: \n{}".format(filename)
-    try:
-        data = pandas.read_csv(filename[0])
-    except Exception as e:
-        print("WARNING: %s not found." % filename[0])
-        quit()
-    return data
-
-def get_log(filename):
-    try:
-        data = pandas.read_csv(filename)
-    except Exception as e:
-        print("WARNING: %s not found." % filename)
-    return data
-
-
-def get_job_data(filename):
-
-    with open(filename) as f:
-        job = json.load(f)
-    return job
-
-
-def get_job_data_txt(filename):
-    try:
-        info = open(filename)
-        job = eval(info.read())
-    except:
-        print("WARNING: %s not found" % filename)
-    return job
-
-
-def smooth_data(y, window_length=101, polyorder=3):
-    window_length = min(int(len(y) / 2),
-                        window_length)  # set maximum valid window length
-    # if window not off
-    if window_length % 2 == 0:
-        window_length = window_length + 1
-    return signal.savgol_filter(y, window_length, polyorder)
-
+from viz_csv_logs import *
 
 def plot_mxrl_logs(log, job, job_name, smooth, user):
         # x axis
