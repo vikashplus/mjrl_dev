@@ -55,20 +55,19 @@ def smooth_data(y, window_length=101, polyorder=3):
     except Exception as e:
         return y # nans
 
-def plot_log_keys(log, job, job_name, smooth, keys):
+def plot_log_keys(log, job_name, smooth, keys):
         # x axis
         if 'iteration' in log.keys():
             epochs = log['iteration']
         else:
             epochs = range(len(log))
         samples = np.cumsum(log['num_samples'])
-        horizon = 1 # job['horizon']
 
         # keys
         nkeys = len(keys)
         for ikey, key in enumerate(keys):
-            plot(xdata=epochs, ydata=smooth_data(log[key], smooth)/horizon, legend=job_name, subplot_id=(2, nkeys, ikey+1), xaxislabel='epochs', fig_name='viz_csv', plot_name=key, fig_size=(4*nkeys, 8))
-            plot(xdata=samples, ydata=smooth_data(log[key], smooth)/horizon, legend=job_name, subplot_id=(2, nkeys, nkeys+ikey+1), xaxislabel='samples', fig_name='viz_csv', plot_name=key)
+            plot(xdata=epochs, ydata=smooth_data(log[key], smooth), legend=job_name, subplot_id=(2, nkeys, ikey+1), xaxislabel='epochs', fig_name='viz_csv', plot_name=key, fig_size=(4*nkeys, 8))
+            plot(xdata=samples, ydata=smooth_data(log[key], smooth), legend=job_name, subplot_id=(2, nkeys, nkeys+ikey+1), xaxislabel='samples', fig_name='viz_csv', plot_name=key)
 
 
 # MAIN =========================================================
@@ -96,19 +95,28 @@ def main():
     # Scan jobs and plot
     for iexp, exp_dir in enumerate(args.job):
         for i, exp_path in enumerate(exp_dir):
-            try:
-                job = get_job_data(exp_path + '/job_config.json')
-            except Exception as e:
-                job = get_job_data_txt(exp_path + '/job_data.txt')
-                
+            # try:
+            #     job = get_job_data(exp_path + '/job_config.json')
+            # except Exception as e:
+            #     job = get_job_data_txt(exp_path + '/job_data.txt')
+
             log = get_file(exp_path, 'log.csv')
 
+            # validate keys
+            if len(args.keys)>0:
+                for key in args.keys:
+                    assert key in log.keys(), "{} not present in available keys {}".format(key, log.keys())
+            else:
+                print("Available keys: ", log.keys())
+
+            # validate lables
             if args.label[iexp] is '':
                 job_name = exp_path.split('/')[-1]
             else:
                 job_name = args.label[iexp]#+str(i)
 
-            plot_log_keys(log, job, job_name, args.smooth, args.keys)
+            # plot keys
+            plot_log_keys(log, job_name, args.smooth, args.keys)
     show_plot()
 
 if __name__ == '__main__':
