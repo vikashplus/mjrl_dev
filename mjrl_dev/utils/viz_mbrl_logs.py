@@ -10,7 +10,7 @@ import pandas
 import glob
 from viz_csv_logs import *
 
-def plot_mbrl_logs(log, job, job_name, smooth, user, xaxis='epochs'):
+def plot_mbrl_logs(log, job, job_name, smooth, user_key, xaxis='epochs'):
         # x axis
         n_epochs = len(log)
         horizon = job['horizon']
@@ -65,6 +65,9 @@ def plot_mbrl_logs(log, job, job_name, smooth, user, xaxis='epochs'):
             pass
         plot(xdata=epochs, ydata=smooth_data(log['rollout_metric'], smooth), legend=job_name+' train', subplot_id=(3, 2, 4), fig_name='MBRL', plot_name="Policy's success", color=job_color, linestyle='--', linewidth=1.5)
 
+        # user keys
+        if user_key:
+            plot(xdata=epochs, ydata=smooth_data(log[user_key], smooth), legend=job_name, subplot_id=(3, 2, 6), fig_name='MBRL', plot_name="UserKey: "+user_key, color=job_color)
 
         return
         # time ['data_collect_time, 'model_update_time', 'policy_update_time', 'eval_log_time', 'iter_time']
@@ -153,6 +156,10 @@ def main():
                 job_name = exp_path.split('/')[-1]
             else:
                 job_name = args.label[iexp]#+str(i)
+
+            # validate keys
+            if args.user:
+                assert args.user in log.keys(), "{} not in available keys{}".format(args.user, log.keys())
 
             plot_mbrl_logs(log, job, job_name, args.smooth, args.user, xaxis=args.xaxis)
     show_plot()
