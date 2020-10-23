@@ -18,6 +18,7 @@ from scipy import signal
 import warnings
 warnings.filterwarnings(
     action="ignore", module="scipy", message="^internal gelsd")
+from viz_csv_logs import *
 
 
 def get_results(filename):
@@ -42,25 +43,25 @@ def get_log(filename):
     return data
 
 
-def get_job_data(filename):
-    try:
-        info = open(filename)
-        job = eval(info.read())
-    except:
-        print("WARNING: %s not found" % filename)
-    return job
+# def get_job_data_txt(filename):
+#     try:
+#         info = open(filename)
+#         job = eval(info.read())
+#     except:
+#         print("WARNING: %s not found" % filename)
+#     return job
 
 
-def smooth_data(y, window_length=101, polyorder=3):
-    window_length = min(int(len(y) / 2),
-                        window_length)  # set maximum valid window length
-    # if window not off
-    if window_length % 2 == 0:
-        window_length = window_length + 1
-    try:
-        return signal.savgol_filter(y, window_length, polyorder)
-    except:
-        return y
+# def smooth_data(y, window_length=101, polyorder=3):
+#     window_length = min(int(len(y) / 2),
+#                         window_length)  # set maximum valid window length
+#     # if window not off
+#     if window_length % 2 == 0:
+#         window_length = window_length + 1
+#     try:
+#         return signal.savgol_filter(y, window_length, polyorder)
+#     except:
+#         return y
 
 
 # MAIN =========================================================
@@ -109,7 +110,7 @@ def main():
         results_info = results_info + exp_info + '\n'
         cprint(exp_info, 'white', 'on_blue', attrs=['bold', 'underline'])
         for i, exp_path in enumerate(exp_dir):
-            job = get_job_data(exp_path + '/job_data.txt')
+            job = get_job_data_txt(exp_path + '/job_data.txt')
             log = get_log(exp_path + '/logs/log.csv')
             epochs = np.arange(len(log['stoc_pol_mean']))
             samples = np.cumsum(log['num_samples']) #epochs * job['num_traj'] * job['horizon']
@@ -122,13 +123,18 @@ def main():
             # score = smooth_data(log['score'], window_length=args.smooth)/log['num_samples'] # no termination penalties, hence normalized by samples
             if 'score' in log.dtype.names:
                 score = smooth_data(log['score'], window_length=args.smooth) # score/step is returned
+            elif 'rwd_sparse' in log.dtype.names:
+                score = smooth_data(log['rwd_sparse'], window_length=args.smooth) # score/step is returned
             else:
                 score = np.zeros_like(reward)
             ax3.plot(epochs, score, label=job['job_name'], linewidth=2)
 
             # Success percentage
             try:
-                succ_p = smooth_data(log['success_rate'], window_length=args.smooth)
+                if 'success_rate' in log.dtype.names:
+                    succ_p = smooth_data(log['success_rate'], window_length=args.smooth)
+                elif 'success_percentage' in log.dtype.names:
+                    succ_p = smooth_data(log['success_percentage'], window_length=args.smooth)
             except ValueError as e:
                 succ_p = np.zeros(len(reward))
             ax5.plot(epochs, succ_p, label=job['job_name'], linewidth=2)
