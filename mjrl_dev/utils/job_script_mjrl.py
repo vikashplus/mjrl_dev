@@ -8,7 +8,6 @@ import pickle
 import time as timer
 import traceback
 import pprint
-import psutil
 
 os.environ['MKL_THREADING_LAYER'] = 'GNU'
 
@@ -64,7 +63,8 @@ def single_process(job):
     e = GymEnv(env_name)
 
     # Make baseline
-    baseline = MLPBaseline(e.spec)
+    baseline = MLPBaseline(e.spec, use_gpu=job['alg_hyper_params']['device'] is 'cuda')
+
 
     # save job details
     job['horizon'] = e.horizon
@@ -81,7 +81,7 @@ def single_process(job):
         loaded_params = loaded_policy.get_param_values()
         print("log std values in loaded policy = ")
         print(loaded_params[-policy.m:])
-        # NOTE: if the log std is too small 
+        # NOTE: if the log std is too small
         # (say <-2.0, it is problem dependent and intuition should be used)
         # then we need to bump it up so that it explores
         loaded_params[-policy.m:] += job['init_std']
@@ -89,12 +89,19 @@ def single_process(job):
         del job['init_policy']
 
     else:
-        policy = MLP(
-            e.spec,
-            init_log_std=job['init_std'],
-            hidden_sizes=job['hidden_sizes'],
-            # hidden_sizes=(32, 32),
-            seed=job['seed'])
+        try:
+            policy = MLP(
+                e.spec,
+                init_log_std=job['init_std'],
+                hidden_sizes=job['hidden_sizes'],
+                seed=job['seed'])#,
+                # device=job['alg_hyper_params']['device'])
+        except Exception as e:
+            policy = MLP(
+                e.spec,
+                init_log_std=job['init_std'],
+                hidden_sizes=job['hidden_sizes'],
+                seed=job['seed'])
 
     # Agent
     agent = NPG(
@@ -104,7 +111,8 @@ def single_process(job):
         seed=job['seed'],
         normalized_step_size=job['normalized_step_size'],
         save_logs=job['save_logs'],
-        FIM_invert_args=job['FIM_invert_args'])
+        FIM_invert_args=job['FIM_invert_args'],
+        **job['alg_hyper_params'])
 
     # Train Agent
     train_agent(
@@ -136,7 +144,6 @@ def product_dict(**kwargs):
         yield dict(zip(keys, instance))
 
 def notify_user(summary='test subject', details='test body'):
-    details += ":: CPU-" + str(psutil.cpu_percent()) + str(psutil.virtual_memory())
     print(summary + ": ", details)
     if "SMS_GATEWAY" in os.environ:
         send_message(os.environ['SMS_GATEWAY'], summary, details)
@@ -161,7 +168,7 @@ def main():
             s = f.read()
             job_set.append(eval(s))
 
-    # create jobs 
+    # create jobs
     jobs = []
     ctr = 0
     for j in job_set:
@@ -212,6 +219,10 @@ def main():
         job['num_cpu'] = 1 if args.hardware else (args.num_cpu
                                                   or job['num_cpu'])
 
+        # algorithms hyper prms
+        if 'alg_hyper_params' not in job:
+            job['alg_hyper_params'] = {'device': "cpu"}
+
     print('Running {} jobs {}'.format(
         len(jobs), 'in parallel' if args.parallel else 'sequentially'))
 
@@ -251,7 +262,6 @@ def main():
     # Send notifcation to the user
     msg_subject = "{}:: {} finished".format(os.uname()[1], jobs[0]['job_name'])
     msg_body = 'Total time taken = %f sec' % (t2 - t1)
-    # msg_body += ":: CPU-" + str(psutil.cpu_percent()) + str(psutil.virtual_memory())
 
     print(msg_subject + ": " + msg_body)
     if args.email:
@@ -259,7 +269,7 @@ def main():
     if args.sms:
         send_message(args.sms, msg_subject, msg_body)
 
-    # Upload to S3 buckets 
+    # Upload to S3 buckets
     if args.upload=='s3':
         print("Uploading Project folder to S3")
         os.system("aws s3 sync ~/Projects/r3l/ s3://r3l/")
