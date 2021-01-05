@@ -9,6 +9,7 @@ from mjrl.utils.gym_env import GymEnv
 
 # Policies
 from mjrl.policies.gaussian_mlp import MLP
+import time
 
 # Samplers
 # import mjrl.samplers.trajectory_sampler as trajectory_sampler
@@ -41,24 +42,22 @@ def main():
     #         },
     #     })
     e = GymEnv(args.env_name)
-    # e.env.env._seed(args.seed)
+    e.env.env.seed(args.seed)
 
     # load policy
     policy = args.policy
     mode = args.mode
     if args.policy == "":
-        pol = MLP(e.spec, init_log_std=0.0)
+        pol = MLP(e.spec, init_log_std=args.log_std)
         mode = "exploration"
         policy = "random_policy.pickle"
-
     elif args.policy == "saved":
         curr_dir = os.path.dirname(os.path.abspath(__file__))
         policy = curr_dir + "/" + args.env_name + "/best_policy.pickle"
         pol = pickle.load(open(policy, 'rb'))
-
     else:
         # do this on the remote machine ============
-        # weights = pol.get_param_values() 
+        # weights = pol.get_param_values()
         # pickle.dump(weights, open("weights.pickle", 'wb'))
         # on local machine ============
         # pol = MLP(e.spec, init_log_std=-3.50)
@@ -66,6 +65,12 @@ def main():
         # pol.set_param_values(loaded_params)
         # pickle.dump(pol, open(policy, 'wb')) # save the policy
         pol = pickle.load(open(policy, 'rb'))
+        if mode == "exploration":
+            # pol.log_std = pol.log_std + args.log_std
+            print(pol.log_std_val)
+            pol.log_std_val = pol.log_std_val + args.log_std
+
+    # print(pol.log_std_val)
 
     # dump rollouts
     if (args.num_samples > 0):
@@ -80,40 +85,43 @@ def main():
             num_traj=args.num_samples,
             env=e,
             policy=pol,
-            eval_mode = True,
+            eval_mode = (mode=='evaluation'),
             horizon=e.horizon,
             base_seed=args.seed)
 
         # Policy stats
         eval_success = e.env.env.evaluate_success(paths)
-        try:
-            eval_rewards = np.mean([np.sum(p['env_infos']['reward']) for p in paths])/e.horizon
-            eval_score = np.mean([np.mean(p['env_infos']['score']) for p in paths])
-        except:
-            eval_rewards = np.mean([np.sum(p['env_infos']['rwd_dense']) for p in paths])/e.horizon
-            eval_score = np.mean([np.mean(p['env_infos']['rwd_sparse']) for p in paths])
+        # try:
+        #     eval_rewards = np.mean([np.sum(p['env_infos']['reward']) for p in paths])/e.horizon
+        #     eval_score = np.mean([np.mean(p['env_infos']['score']) for p in paths])
+        # except:
+        #     eval_rewards = np.mean([np.sum(p['env_infos']['rwd_dense']) for p in paths])/e.horizon
+        #     eval_score = np.mean([np.mean(p['env_infos']['rwd_sparse']) for p in paths])
 
-        evaluate_success = np.mean([np.sum(p['env_infos']['solved']) for p in paths])
+        # evaluate_success = np.mean([np.sum(p['env_infos']['solved']) for p in paths])
 
-        stats = "Policy stats:: <mean reward/step: %+.3f>, <mean score/step: %+.3f>, <mean success: %2.1f%%>\n" % (
-            eval_rewards, eval_score, eval_success)
-        for ipath, path in enumerate(paths):
-            stats = stats + "path%d:: <reward[-1]: %+.3f>, <score[-1]: %+.3f>\n" % (
-                ipath, path['env_infos']['rwd_dense'][-1], path['env_infos']['rwd_sparse'][-1])
-        print(stats)
+        # stats = "Policy stats:: <mean reward/step: %+.3f>, <mean score/step: %+.3f>, <mean success: %2.1f%%>\n" % (
+        #     eval_rewards, eval_score, eval_success)
+        # for ipath, path in enumerate(paths):
+        #     stats = stats + "path%d:: <reward[-1]: %+.3f>, <score[-1]: %+.3f>\n" % (
+        #         ipath, path['env_infos']['rwd_dense'][-1], path['env_infos']['rwd_sparse'][-1])
+        # print(stats)
 
+        print("eval_success: ", eval_success)
         # save to a file
-        file_name = policy[:-7] + '_stats.txt'
-        print(stats, file=open(file_name, 'w'))
-        print("saved ", file_name)
+        time_stamp = time.strftime("%Y%m%d-%H%M%S")
+        # file_name = policy[:-7] + '_stats_{}.txt'.format(time_stamp)
+        # print(stats, file=open(file_name, 'w'))
+        # print("saved ", file_name)
 
         # plot_horizon_distribution(paths, e, fileName_prefix=policy[:-7])
         plot_paths(paths, e, fileName_prefix=policy[:-7])
-        file_name = policy[:-7] + '_paths.pickle'
+        file_name = policy[:-7] + '_paths_{}.pickle'.format(time_stamp)
         pickle.dump(paths, open(file_name, 'wb'))
         print("saved ", file_name)
 
     else:
+        print
         # Visualized policy
         if args.render == "onscreen":
             # On screen
@@ -126,7 +134,7 @@ def main():
             # Offscreen buffer
             e.env.env.visualize_policy_offscreen(
                 pol,
-                horizon=100,
+                horizon=e.horizon,
                 num_episodes=args.num_episodes,
                 mode=mode,
                 filename=args.filename)

@@ -24,7 +24,7 @@ def main(include, env_name, path_file, loop, render, save):
 
     # load paths
     paths = pickle.load(open(path_file, 'rb'))
-    
+
     # playback paths
     pbk_paths = []
     for i_loop in range(loop):

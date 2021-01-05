@@ -70,4 +70,7 @@ def get_args(parser=None):
     parser.add_argument('-d', '--seed', default=123, type=int, help=(
         'random number seed'
     ))
+    parser.add_argument('-l', '--log_std', default=0, type=float, help=(
+        'log std of random policy or addional noise to add to provided policy'
+    ))
     return parser.parse_args()
