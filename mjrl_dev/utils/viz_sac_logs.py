@@ -6,14 +6,18 @@ import numpy as np
 from scipy import signal
 
 def get_csv(search_path, file_name):
-    filename = glob.glob(search_path+"/*/**"+file_name)
-    assert (len(filename) > 0), "No file found at: {}".format(search_path+"/*/**"+file_name)
-    assert (len(filename) == 1), "Multiple files found: \n{}".format(filename)
-    try:
-        data = pandas.read_csv(filename[0])
-    except Exception as e:
-        print("WARNING: %s not found." % filename[0])
-        quit()
+    filenames = glob.glob(search_path+"/*/**"+file_name)
+    assert (len(filenames) > 0), "No file found at: {}".format(search_path+"/*/**"+file_name)
+    # assert (len(filenames) == 1), "Multiple files found: \n{}".format(filenames)
+    data = []
+    for filename in filenames:
+        try:
+            print("Reading logs from", filename)
+            dat = pandas.read_csv(filename)
+            data.append(dat)
+        except Exception as e:
+            print("WARNING: %s not found." % filename)
+            quit()
     return data
 
 def smooth_data(y, window_length=101, polyorder=3):
@@ -50,20 +54,21 @@ def main():
     # Scan jobs and plot
     for iexp, exp_dir in enumerate(args.job):
         for i, exp_path in enumerate(exp_dir):
-            # job = get_job_data(exp_path + '/job_data.json')
-            log = get_csv(exp_path, "progress.csv")
 
             if args.label[iexp] is '':
                 job_name = exp_path.split('-')[-1]
             else:
                 job_name = args.label[iexp]#+str(i)
 
-            # x axis            
-            plot_keys = [key for key in log.keys() if args.user in key] 
+            # job = get_job_data(exp_path + '/job_data.json')
+            logs = get_csv(exp_path, "progress.csv")
+            for il, log in enumerate(logs):
+                # x axis: find all matching keys
+                plot_keys = [key for key in log.keys() if args.user in key]
 
-            max_keys = len(plot_keys)
-            for ikey, key in enumerate(plot_keys):
-                plot(xdata=log['epoch'], ydata=smooth_data(log[key], window_length=args.smooth), legend=job_name, plot_name=key, subplot_id=(1, max_keys, ikey+1), fig_name="SAC")
+                max_keys = len(plot_keys)
+                for ikey, key in enumerate(plot_keys):
+                    plot(xdata=log['epoch'], ydata=smooth_data(log[key], window_length=args.smooth), legend=job_name+str(il), plot_name=key, subplot_id=(1, max_keys, ikey+1), fig_name="SAC")
 
     show_plot()
 

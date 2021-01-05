@@ -1,5 +1,5 @@
 ''' Use this script to comapare multiple results \n
-    Usage: python viz_resulyts.py -j expdir1_group0 expdir2_group0 -j expdir3_group1 expdir4_group1 ...
+    Usage: python viz_resulyts.py -j expdir1_group0 expdir2_group0 -j expdir3_group1 expdir4_group1 -k "key1" "key2"...
 '''
 from vtils.plotting.simple_plot import *
 import json
@@ -29,7 +29,6 @@ def get_log(filename):
 
 
 def get_job_data(filename):
-
     with open(filename) as f:
         job = json.load(f)
     return job
@@ -39,9 +38,10 @@ def get_job_data_txt(filename):
     try:
         info = open(filename)
         job = eval(info.read())
+        return job
     except:
         print("WARNING: %s not found" % filename)
-    return job
+        return None
 
 
 def smooth_data(y, window_length=101, polyorder=3):
@@ -61,13 +61,13 @@ def plot_log_keys(log, job_name, smooth, keys):
             epochs = log['iteration']
         else:
             epochs = range(len(log))
-        samples = np.cumsum(log['num_samples'])
+        samples = np.cumsum(log['num_samples'])/1e6
 
         # keys
         nkeys = len(keys)
         for ikey, key in enumerate(keys):
             plot(xdata=epochs, ydata=smooth_data(log[key], smooth), legend=job_name, subplot_id=(2, nkeys, ikey+1), xaxislabel='epochs', fig_name='viz_csv', plot_name=key, fig_size=(4*nkeys, 8))
-            plot(xdata=samples, ydata=smooth_data(log[key], smooth), legend=job_name, subplot_id=(2, nkeys, nkeys+ikey+1), xaxislabel='samples', fig_name='viz_csv', plot_name=key)
+            plot(xdata=samples, ydata=smooth_data(log[key], smooth), legend=job_name, subplot_id=(2, nkeys, nkeys+ikey+1), xaxislabel='samples(M)', fig_name='viz_csv', plot_name=key, xaxisscale="log")
 
 
 # MAIN =========================================================
@@ -102,6 +102,9 @@ def main():
 
             log = get_file(exp_path, 'log.csv')
 
+            print(exp_path)
+            # if i==4:
+            #     args.keys = ["success_rate"]
             # validate keys
             if len(args.keys)>0:
                 for key in args.keys:

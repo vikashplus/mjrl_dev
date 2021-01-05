@@ -22,6 +22,10 @@ def plot_mbrl_logs(log, job, job_name, smooth, user_key, xaxis='epochs'):
                 epochs = np.arange(n_epochs)
         elif xaxis=='samples':
             epochs = np.cumsum(log['num_samples'])/1e6
+        elif xaxis=='time':
+            epochs = np.cumsum(log['num_samples'])/3600
+            # print("We donot know the step length")
+            raise NotImplementedError
 
         # dynamics pred error
         ind = 0; keys=[]
@@ -69,7 +73,7 @@ def plot_mbrl_logs(log, job, job_name, smooth, user_key, xaxis='epochs'):
         if user_key:
             plot(xdata=epochs, ydata=smooth_data(log[user_key], smooth), legend=job_name, subplot_id=(3, 2, 6), fig_name='MBRL', plot_name="UserKey: "+user_key, color=job_color)
 
-        return
+        # return
         # time ['data_collect_time, 'model_update_time', 'policy_update_time', 'eval_log_time', 'iter_time']
         plot(xdata=epochs, ydata=log['iter_time'], legend=job_name+' iter', subplot_id=(3, 2, 6), fig_name='MBRL', plot_name="Computation time", linestyle='-', linewidth=5)
         plot(xdata=epochs, ydata=log['data_collect_time'], legend=job_name+' sample', subplot_id=(3, 2, 6), fig_name='MBRL', plot_name="Computation time", color=job_color, linestyle='-', linewidth=1, alpha=0.5)
@@ -136,7 +140,7 @@ def main():
     parser.add_argument(
         '-u', '--user', type=str, default=None, help='User defined field from log')
     parser.add_argument(
-        '-x', '--xaxis', type=str, default='epochs', help='Choose x-axis: epochs/ samples', choices=['epochs', 'samples'])
+        '-x', '--xaxis', type=str, default='epochs', help='Choose x-axis: epochs/ samples/ time', choices=['epochs', 'samples', 'time'])
     args = parser.parse_args()
 
     # scan labels

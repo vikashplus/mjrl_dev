@@ -111,6 +111,9 @@ def main():
         cprint(exp_info, 'white', 'on_blue', attrs=['bold', 'underline'])
         for i, exp_path in enumerate(exp_dir):
             job = get_job_data_txt(exp_path + '/job_data.txt')
+            if job is None:
+                job = get_job_data_txt(exp_path + '/job_config.json')
+            if 'horizon' not in job: job['horizon'] = 1
             log = get_log(exp_path + '/logs/log.csv')
             epochs = np.arange(len(log['stoc_pol_mean']))
             samples = np.cumsum(log['num_samples']) #epochs * job['num_traj'] * job['horizon']
@@ -118,7 +121,7 @@ def main():
             reward = smooth_data(log['stoc_pol_mean'], window_length=args.smooth)/job['horizon'] # termination penalties provides rewards for path beyong termination
             ax1.plot(epochs, reward, label=job['job_name'], linewidth=2)
             ax7.plot(samples, reward, label=job['job_name'], linewidth=2)
-            
+
             # score
             # score = smooth_data(log['score'], window_length=args.smooth)/log['num_samples'] # no termination penalties, hence normalized by samples
             if 'score' in log.dtype.names:
@@ -137,8 +140,9 @@ def main():
                     succ_p = smooth_data(log['success_percentage'], window_length=args.smooth)
             except ValueError as e:
                 succ_p = np.zeros(len(reward))
+            # succ_p = np.zeros(len(reward))
             ax5.plot(epochs, succ_p, label=job['job_name'], linewidth=2)
-            
+
             # user
             if args.user is not None:
                 try:
@@ -150,7 +154,7 @@ def main():
                 ax8.plot(epochs, user, label=job['job_name'], linewidth=2)
 
 
-            # gather stats 
+            # gather stats
             if sum_reward is not None:
                 sum_reward_min_length = min(len(sum_reward), len(score))
                 sum_reward = sum_reward[:sum_reward_min_length] + reward[:sum_reward_min_length]
@@ -161,8 +165,8 @@ def main():
                 sum_score = score
                 sum_succ_p = succ_p
                 sum_reward_min_length = len(sum_reward)
-            
-            # gather records 
+
+            # gather records
             exp_info = '%30s   %3d   %+1.2f     %3d    %0.3f    %+.2f    %+.2f    %.1f%%' % (job['job_name'], job['seed'], \
                 job['init_std'], job['num_traj'], job['gamma'], reward[-1], score[-1], succ_p[-1])
             print(exp_info)
