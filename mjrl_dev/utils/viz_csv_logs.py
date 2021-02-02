@@ -9,30 +9,45 @@ from scipy import signal
 import pandas
 import glob
 
-def get_file(search_path, file_name):
-    filename = glob.glob(search_path+"/*/**"+file_name)
-    assert (len(filename) > 0), "No file found at: {}".format(search_path+"/*/**"+file_name)
-    assert (len(filename) == 1), "Multiple files found: \n{}".format(filename)
+def get_files(search_path, file_name):
+    search_path = search_path+"/*/**/"+file_name
+    filenames = glob.glob(search_path, recursive=True)
+    assert (len(filenames) > 0), "No file found at: {}".format(search_path)
+    return filenames
+
+    # Another example, Python 3.5+
+    # from pathlib import Path
+    # for path in Path(search_path).rglob(file_name):
+    #     print(path.name)
+
+def get_log(filename, format="csv"):
     try:
-        data = pandas.read_csv(filename[0])
+        if format=="csv":
+            data = pandas.read_csv(filename)
+        elif format=="listofdicts":
+            data = read_listofDicts(filename)
+        elif format=="json":
+            data = pandas.read_json(filename)
     except Exception as e:
-        print("WARNING: %s not found." % filename[0])
+        print("WARNING: Can't read %s." % filename)
         quit()
     return data
 
-def get_log(filename):
-    try:
-        data = pandas.read_csv(filename)
-    except Exception as e:
-        print("WARNING: %s not found." % filename)
-    return data
-
+def read_listofDicts(filename):
+    with open(filename, 'rt') as log_file:
+        lines = log_file.read().split('\n')
+        dict_list = []
+        for l in lines:
+            if l != '':
+                dictionary = eval(l)
+                dict_list.append(dictionary)
+    return pandas.DataFrame(dict_list)
 
 def get_job_data(filename):
+    Warning("Depricated: Use 'get_log(filename, format='json') instead")
     with open(filename) as f:
         job = json.load(f)
     return job
-
 
 def get_job_data_txt(filename):
     try:
@@ -42,7 +57,6 @@ def get_job_data_txt(filename):
     except:
         print("WARNING: %s not found" % filename)
         return None
-
 
 def smooth_data(y, window_length=101, polyorder=3):
     window_length = min(int(len(y) / 2),
@@ -55,19 +69,18 @@ def smooth_data(y, window_length=101, polyorder=3):
     except Exception as e:
         return y # nans
 
-def plot_log_keys(log, job_name, smooth, keys):
-        # x axis
-        if 'iteration' in log.keys():
-            epochs = log['iteration']
-        else:
-            epochs = range(len(log))
-        samples = np.cumsum(log['num_samples'])/1e6
+def plot_log_keys(log, job_name, smooth, xkeys=None, ykeys=None, title=None):
+        # Default x data
+        if xkeys is None:
+            xkeys = ['epochs']
+            log['epochs'] = range(len(log))
 
         # keys
-        nkeys = len(keys)
-        for ikey, key in enumerate(keys):
-            plot(xdata=epochs, ydata=smooth_data(log[key], smooth), legend=job_name, subplot_id=(2, nkeys, ikey+1), xaxislabel='epochs', fig_name='viz_csv', plot_name=key, fig_size=(4*nkeys, 8))
-            plot(xdata=samples, ydata=smooth_data(log[key], smooth), legend=job_name, subplot_id=(2, nkeys, nkeys+ikey+1), xaxislabel='samples(M)', fig_name='viz_csv', plot_name=key, xaxisscale="log")
+        nxkeys = len(xkeys)
+        nykeys = len(ykeys)
+        for ixkey, xkey in enumerate(xkeys):
+            for iykey, ykey in enumerate(ykeys):
+                plot(xdata=log[xkey], ydata=smooth_data(log[ykey], smooth), legend=job_name, subplot_id=(nxkeys, nykeys, nykeys*ixkey+iykey+1), xaxislabel=xkey, fig_name='viz_csv', plot_name=title, yaxislabel=ykey, fig_size=(4*nykeys, 4*nxkeys))
 
 
 # MAIN =========================================================
@@ -78,17 +91,24 @@ def main():
     parser.add_argument(
         '-j', '--job', action='append', nargs='+', help='job group')
     parser.add_argument(
+        '-f', '--file', type=str, default="log.csv", help='name of log file (with extension)')
+    parser.add_argument(
+        '-e', '--type', choices=['csv','listofdicts'], default="csv", help='log format')
+    parser.add_argument(
+        '-t', '--title', type=str, default=None, help='Title of the plot')
+    parser.add_argument(
         '-l', '--label', action='append', nargs='?', help='job group label')
     parser.add_argument(
         '-s', '--smooth', type=int, default=101, help='window for smoothing')
     parser.add_argument(
-        '-k', '--keys', nargs='+', default=["running_score"], help='Keys to plot')
+        '-y', '--ykeys', nargs='+', default=["running_score", "success_rate"], help='yKeys to plot')
+    parser.add_argument(
+        '-x', '--xkeys', nargs='+', default=["iteration"], help='xKeys to plot')
     args = parser.parse_args()
 
     # scan labels
     if args.label is not None:
-        assert (len(args.job) == len(args.label)
-                ), "The number of labels has to be same as the number of jobs"
+        assert (len(args.job) == len(args.label)), "The number of labels has to be same as the number of jobs"
     else:
         args.label = [''] * len(args.job)
 
@@ -100,26 +120,21 @@ def main():
             # except Exception as e:
             #     job = get_job_data_txt(exp_path + '/job_data.txt')
 
-            log = get_file(exp_path, 'log.csv')
+            for log_file in get_files(exp_path, args.file):
+                log = get_log(filename=log_file, format=args.type)
 
-            print(exp_path)
-            # if i==4:
-            #     args.keys = ["success_rate"]
-            # validate keys
-            if len(args.keys)>0:
-                for key in args.keys:
+                # validate keys
+                for key in args.xkeys+args.ykeys:
                     assert key in log.keys(), "{} not present in available keys {}".format(key, log.keys())
-            else:
-                print("Available keys: ", log.keys())
 
-            # validate lables
-            if args.label[iexp] is '':
-                job_name = exp_path.split('/')[-1]
-            else:
-                job_name = args.label[iexp]#+str(i)
+                # validate lables
+                if args.label[iexp] is '':
+                    job_name = exp_path.split('/')[-1]
+                else:
+                    job_name = args.label[iexp]#+str(i)
 
-            # plot keys
-            plot_log_keys(log, job_name, args.smooth, args.keys)
+                # plot keys
+                plot_log_keys(log, job_name, args.smooth, xkeys=args.xkeys, ykeys=args.ykeys, title=args.title)
     show_plot()
 
 if __name__ == '__main__':
