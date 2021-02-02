@@ -79,8 +79,15 @@ def plot_log_keys(log, job_name, smooth, xkeys=None, ykeys=None, title=None):
         nxkeys = len(xkeys)
         nykeys = len(ykeys)
         for ixkey, xkey in enumerate(xkeys):
+            if xkey in ['num_samples']: #special keys
+                plot_xdata = np.cumsum(log[xkey])/1e6
+                plot_xkey = xkey+"(M)"
+            else:
+                plot_xdata = log[xkey]
+                plot_xkey = xkey
+
             for iykey, ykey in enumerate(ykeys):
-                plot(xdata=log[xkey], ydata=smooth_data(log[ykey], smooth), legend=job_name, subplot_id=(nxkeys, nykeys, nykeys*ixkey+iykey+1), xaxislabel=xkey, fig_name='viz_csv', plot_name=title, yaxislabel=ykey, fig_size=(4*nykeys, 4*nxkeys))
+                plot(xdata=plot_xdata, ydata=smooth_data(log[ykey], smooth), legend=job_name, subplot_id=(nxkeys, nykeys, nykeys*ixkey+iykey+1), xaxislabel=plot_xkey, fig_name='viz_csv', plot_name=title, yaxislabel=ykey, fig_size=(4*nykeys, 4*nxkeys))
 
 
 # MAIN =========================================================
