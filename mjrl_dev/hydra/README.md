@@ -4,6 +4,8 @@
 1. install hydra `pip install hydra-core --upgrade`
 2. install [submitit](https://github.com/facebookincubator/submitit) launcher hydra plugin to launch jobs on cluster/ local `pip install hydra-submitit-launcher --upgrade`
 
+NOTE: FAIR cluster users should follow [hydra's internal guide](https://www.internalfb.com/intern/staticdocs/hydra/docs/fb/intro/) for installation
+
 ## Launch jobs
 1. Try demos script using `python hydra_demo_script.py`
 2. To launch job using submitit launcher locally try `python hydra_demo_script.py --multirun hydra/launcher=submitit_local`
