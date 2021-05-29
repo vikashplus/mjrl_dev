@@ -3,15 +3,31 @@ from gym import utils
 from mjrl.envs import mujoco_env
 from mujoco_py import MjViewer
 import os
-from darwin.darwin_utils.obs_vec_dict import ObsVecDict
+from mj_envs.utils.obj_vec_dict import ObsVecDict
 import collections
 
 OBS_KEYS = [ ]
 RWD_KEYS = [ ]
-REW_MODE = 'rwd_dense' # rwd_dense/ rwd_sparse
 
 class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
-    def __init__(self):
+    DEFAULT_REWARD_KEYS_AND_WEIGHTS = {
+        "rewards_term1": 1.0,
+        "rewards_term2": 2.0,
+        "rewards_term3": 3.0,
+    }
+    DEFAULT_OBS_KEYS_AND_WEIGHTS = {
+        "obss_term1": 0.0, # zero weight can be used to add a dims to input which is always zero. Helpful during distillation exps
+        "obss_term2": 1.0,
+        "obss_term3": 2.0,
+    }
+
+    def __init__(self,
+            rwd_keys = DEFAULT_REWARD_KEYS_AND_WEIGHTS,
+            obs_keys = DEFAULT_OBS_KEYS_AND_WEIGHTS,
+            **kwargs):
+
+        self.obs_keys = obs_keys
+        self.rwd_keys = rwd_keys
 
         # get sim
         curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -30,6 +46,8 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
         self.obs_dict = {}
         self.rwd_dict = {}
         mujoco_env.MujocoEnv.__init__(self, sim=sim, frame_skip=5)
+        self.action_space.low = -np.ones_like(self.action_space.low)
+        self.action_space.high = np.ones_like(self.action_space.high)
 
     # step the simulation forward
     def step(self, a):
@@ -39,7 +57,7 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
         except:
             a = a                             # only for the initialization phase
         self.do_simulation(a, self.frame_skip)
-        
+
         # observation and rewards
         obs = self.get_obs()
         self.expand_dims(self.obs_dict) # required for vectorized rewards calculations
@@ -49,39 +67,39 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
 
         # finalize step
         env_info = self.get_env_infos()
-        return obs, env_info[REW_MODE], bool(env_info['done']), env_info
+        return obs, env_info[RWD_MODE], bool(env_info['done']), env_info
 
     def get_obs(self):
         self.obs_dict['t'] = np.array([self.sim.data.time])
         self.obs_dict['err'] = self.data.qpos[:-2].copy()
 
-        obs = self.obsdict2obsvec(self.obs_dict, OBS_KEYS)
+        t, obs = self.obsdict2obsvec(self.obs_dict, OBS_KEYS)
         return obs
 
     def get_reward_dict(self, obs_dict):
         reach_dist = np.linalg.norm(obs_dict['palm_pos']-obs_dict['handle_pos'], axis=-1)
         door_pos = obs_dict['door_pos'][:,:,0]
-        
+
         rwd_dict = collections.OrderedDict((
             # Optional Keys
             ('reach', -0.1* reach_dist),
             ('open', -0.1*(door_pos - 1.57)*(door_pos - 1.57)),
             ('bonus', 2*(door_pos > 0.2) + 8*(door_pos > 1.0) + 10*(door_pos > 1.35)),
             # Must keys
-            ('sparse',  door_pos),
+            ('score',  door_pos),
             ('solved',  door_pos > 1.35),
             ('done',    reach_dist > 5.0),
         ))
-        rwd_dict['dense'] = np.sum([rwd_dict[key] for key in RWD_KEYS], axis=0)
+        rwd_dict['reward'] = np.sum([wt*rwd_dict[key] for key, wt in RWD_KEYS.items()], axis=0)
         return rwd_dict
-    
+
     # use latest obs, rwds to get all info (be careful, information belongs to different timestamps)
     # Its getting called twice. Once in step and sampler calls it as well
     def get_env_infos(self):
         env_info = {
             'time': self.obs_dict['t'][()],
-            'rwd_dense': self.rwd_dict['dense'][()],
-            'rwd_sparse': self.rwd_dict['sparse'][()],
+            'reward': self.rwd_dict['reward'][()],
+            'score': self.rwd_dict['score'][()],
             'solved': self.rwd_dict['solved'][()],
             'done': self.rwd_dict['done'][()],
             'obs_dict': self.obs_dict,
@@ -97,11 +115,11 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
         obs_dict = self.obsvec2obsdict(paths["observations"])
         rwd_dict = self.get_reward_dict(obs_dict)
 
-        rewards = reward_dict['dense']
-        done = reward_dict['done']
+        rewards = rwd_dict['reward']
+        done = rwd_dict['done']
         # time align rewards. last step is redundant
         done[...,:-1] = done[...,1:]
-        rewards[...,:-1] = rewards[...,1:] 
+        rewards[...,:-1] = rewards[...,1:]
         paths["done"] = done if done.shape[0] > 1 else done.ravel()
         paths["rewards"] = rewards if rewards.shape[0] > 1 else rewards.ravel()
         return paths
@@ -110,10 +128,10 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
     def truncate_paths(self, paths):
         hor = paths[0]['rewards'].shape[0]
         for path in paths:
-            if path['done'][-1] == False:
+            if path['done'][-1] == False: # non termination path
                 path['terminated'] = False
                 terminated_idx = hor
-            elif path['done'][0] == False:
+            else: # terminated path
                 terminated_idx = sum(~path['done'])+1
                 for key in path.keys():
                     path[key] = path[key][:terminated_idx+1, ...]
@@ -175,11 +193,10 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
 
         # log stats
         if logger:
-            rwd_sparse = np.mean([np.mean(p['env_infos']['rwd_sparse']) for p in paths]) # return rwd/step
-            rwd_dense = np.mean([np.sum(p['env_infos']['rwd_sparse'])/horizon for p in paths]) # return rwd/step
-            logger.log_kv('rwd_sparse', rwd_sparse)
-            logger.log_kv('rwd_dense', rwd_dense)
+            score = np.mean([np.mean(p['env_infos']['score']) for p in paths]) # return rwd/step
+            reward = np.mean([np.sum(p['env_infos']['reward'])/horizon for p in paths]) # return rwd/step
             logger.log_kv('score', score)
-            logger.log_kv('success_rate', success_percentage)
+            logger.log_kv('reward', reward)
+            logger.log_kv('success_percentage', success_percentage)
 
         return success_percentage
