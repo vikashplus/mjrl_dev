@@ -7,7 +7,7 @@ hydra:
         mem_gb: 4
         name: ${hydra.job.name}
         # array_parallelism: 256
-        # _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+        _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
     run:
         dir: /checkpoint/${env:USER}/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
     sweep:

@@ -6,6 +6,7 @@ hydra:
         timeout_min: 60
         mem_gb: 4
         name: ${hydra.job.name}
+        _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.LocalLauncher
     run:
         dir: /checkpoint/${env:USER}/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
     sweep:

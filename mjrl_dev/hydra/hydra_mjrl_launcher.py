@@ -1,16 +1,12 @@
 """
-This is a job script for running policy gradient algorithms on gym tasks using hydra
-Separate job scripts are provided to run few other algorithms
-- For DAPG see here: https://github.com/aravindr93/hand_dapg/tree/master/dapg/examples
-- For model-based NPG see here: https://github.com/aravindr93/mjrl/tree/master/mjrl/algos/model_accel
+This is a launcher script for launching mjrl training using hydra
 """
 
 import os
-import json
 import time as timer
 import hydra
 from omegaconf import DictConfig, OmegaConf
-from hydra_mjrl_job import train_loop
+from mjrl_job_script import train_loop
 
 # ===============================================================================
 # Process Inputs and configure job
@@ -21,16 +17,12 @@ def configure_jobs(job_data):
     print("Job Configuration")
     print("========================================")
 
-    if not os.path.exists(job_data.job_name):
-        os.mkdir(job_data.job_name)
     assert 'algorithm' in job_data.keys()
     assert any([job_data.algorithm == a for a in ['NPG', 'NVPG', 'VPG', 'PPO']])
     assert 'sample_mode' in job_data.keys()
     job_data.alg_hyper_params = dict() if 'alg_hyper_params' not in job_data.keys() else job_data.alg_hyper_params
 
-    EXP_FILE = job_data.job_name + '/job_config.json'
-    with open(EXP_FILE, 'w') as fp:
-        # json.dump(job_data, f, indent=4)
+    with open('job_config.json', 'w') as fp:
         OmegaConf.save(config=job_data, f=fp.name)
 
     if job_data.sample_mode == 'trajectories':
