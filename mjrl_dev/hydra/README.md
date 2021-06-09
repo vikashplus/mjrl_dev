@@ -15,7 +15,10 @@ NOTE: FAIR cluster users should follow [hydra's internal guide](https://www.inte
 1. To sweep over any (e.g-exp.seed) parameter `python hydra_demo_script.py --multirun hydra/launcher=submitit_local exp.seed=10,20`
 
 ## Examples
-1. Train using [mjrl](https://github.com/aravindr93/mjrl) agents
+1. Over ride a parameter `python hydra_demo_script.py exp.seed=1`
+2. Add a new group to your configs `python hydra_demo_script.py +group=group1`
+3. To sweep over parameters `python hydra_demo_script.py -m exp.seed=1,2`
+4. Train using [mjrl](https://github.com/aravindr93/mjrl) agents
     - `python hydra_policy_opt_job_script.py`
     - `python hydra_policy_opt_job_script.py --multirun hydra/launcher=submitit_local`
     - `python hydra_policy_opt_job_script.py --multirun hydra/launcher=submitit_slurm`

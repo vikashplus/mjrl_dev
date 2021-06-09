@@ -1,11 +1,13 @@
 hydra:
-	launcher: 
-		submitit_folder: ${hydra.sweep.dir}/.submitit/%j
-		timeout_min: 60
-		cpus_per_task: 1
-		gpus_per_node: 0
-		tasks_per_node: 1
-		mem_gb: 4
-		nodes: 1
-		name: ${hydra.job.name}
-		_target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.LocalLauncher
+    launcher:
+        cpus_per_task: 4
+        gpus_per_node: 0
+        tasks_per_node: 1
+        timeout_min: 60
+        mem_gb: 4
+        name: ${hydra.job.name}
+    run:
+        dir: /checkpoint/${env:USER}/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+    sweep:
+        dir: /checkpoint/${env:USER}/outputs/${hydra.job.name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+        subdir: ${hydra.job.num}_${hydra.job.override_dirname}
