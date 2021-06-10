@@ -1,3 +1,6 @@
+default:
+    - override hydra/launcher: native
+
 # general outputs
 job_name          : 'hydra_npg_demo'
 
@@ -32,8 +35,3 @@ alg_hyper_params  :   {}
 hydra:
     job:
         name: ${job_name}
-    run:
-        dir: ./outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
-    sweep:
-        dir: ./outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
-        subdir: ${hydra.job.num}_${hydra.job.override_dirname}
