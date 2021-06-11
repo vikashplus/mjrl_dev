@@ -1,5 +1,6 @@
 default:
-    - override hydra/launcher: native
+    - override hydra/launcher: local
+    - override hydra/output: local
 
 exp:
   seed: 1
