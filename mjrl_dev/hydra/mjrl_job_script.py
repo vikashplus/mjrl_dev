@@ -26,7 +26,8 @@ def train_loop(job_data) -> None:
     policy_size = tuple(eval(job_data.policy_size))
     vf_hidden_size = tuple(eval(job_data.vf_hidden_size))
 
-    policy = MLP(e.spec, hidden_sizes=policy_size, seed=job_data.seed, init_log_std=job_data.init_log_std)
+    policy = MLP(e.spec, hidden_sizes=policy_size, seed=job_data.seed, 
+                 init_log_std=job_data.init_log_std, min_log_std=job_data.min_log_std)
     baseline = MLPBaseline(e.spec, reg_coef=1e-3, batch_size=job_data.vf_batch_size, hidden_sizes=vf_hidden_size,
                         epochs=job_data.vf_epochs, learn_rate=job_data.vf_learn_rate)
 

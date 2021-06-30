@@ -2,25 +2,23 @@ default:
     - override hydra/launcher: local
     - override hydra/output: local
 
-# general outputs
-job_name          : 'hydra_npg_demo'
-
 # general inputs
-env               :   Hopper-v3
+env               :   mjrl_point_mass-v0      # placeholder name
 algorithm         :   NPG
 seed              :   123
-sample_mode       :   samples
-rl_num_samples    :   1000
-rl_num_traj       :   0
-rl_num_iter       :   2
+sample_mode       :   trajectories
+rl_num_traj       :   20
+rl_num_samples    :   0                       # will be ignored when sample_mode=trajectories
 num_cpu           :   4
+rl_num_iter       :   10
 save_freq         :   5
-eval_rollouts     :   0
-exp_notes         :  'Example config for training policy with NPG on the OpenAI gym Hopper-v3 task.'
+eval_rollouts     :   4
+exp_notes         :  'Keep notes of what this experiment is about. This is a demo config.'
 
 # RL parameters (all params related to PG, value function etc.)
-policy_size       :   (32, 32)
-init_log_std      :   -0.5
+policy_size       :   (64, 64)
+init_log_std      :   -0.1
+min_log_std       :   -1.0
 vf_hidden_size    :   (128, 128)
 vf_batch_size     :   64
 vf_epochs         :   2
@@ -31,8 +29,11 @@ rl_gae            :   0.97
 
 # Algorithm hyperparameters : if alg requires additional params, can be specified here (or defaults will be used)
 
-alg_hyper_params  :   {}
+alg_hyper_params  :   {'device': 'cpu'}
+
+# general outputs
+job_name          :   'job'
 
 hydra:
     job:
-        name: ${job_name}
+        name: mjrl_npg_train_${env}
