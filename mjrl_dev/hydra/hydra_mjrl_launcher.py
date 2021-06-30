@@ -20,6 +20,7 @@ def configure_jobs(job_data):
     assert 'algorithm' in job_data.keys()
     assert any([job_data.algorithm == a for a in ['NPG', 'NVPG', 'VPG', 'PPO']])
     assert 'sample_mode' in job_data.keys()
+    assert any([job_data.sample_mode == m for m in ['samples', 'trajectories']])
     job_data.alg_hyper_params = dict() if 'alg_hyper_params' not in job_data.keys() else job_data.alg_hyper_params
 
     with open('job_config.json', 'w') as fp:
