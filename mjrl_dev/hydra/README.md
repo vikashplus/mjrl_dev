@@ -26,8 +26,8 @@ NOTE: FAIR cluster users should follow [hydra's internal guide](https://www.inte
 2. Add a new group to your configs `python hydra_demo_script.py +group=group1`
 3. To sweep over parameters `python hydra_demo_script.py -m exp.seed=1,2`
 4. Train using [mjrl](https://github.com/aravindr93/mjrl) agents
-    - `python hydra_policy_opt_job_script.py`
-    - `python hydra_policy_opt_job_script.py --multirun hydra/launcher=local hydra/output=local`
-    - `python hydra_policy_opt_job_script.py --multirun hydra/launcher=slurm hydra/output=slurm`
-    - `python hydra_policy_opt_job_script.py --multirun hydra/launcher=slurm hydra/output=slurm seed=10,12`
+    - `python hydra_mjrl_launcher.py`
+    - `python hydra_mjrl_launcher.py --multirun hydra/launcher=local hydra/output=local`
+    - `python hydra_mjrl_launcher.py --multirun hydra/launcher=slurm hydra/output=slurm`
+    - `python hydra_mjrl_launcher.py --multirun hydra/launcher=slurm hydra/output=slurm seed=10,12`
 
