@@ -1,7 +1,7 @@
 ''' Use this script to comapare multiple results \n
     Usage: python viz_resulyts.py -j expdir1_group0 expdir2_group0 -j expdir3_group1 expdir4_group1 -k "key1" "key2"...
 '''
-from vtils.plotting.simple_plot import *
+from vtils.plotting import simple_plot
 import json
 import numpy as np
 import argparse
@@ -15,10 +15,14 @@ def get_files(search_path, file_name):
     assert (len(filenames) > 0), "No file found at: {}".format(search_path)
     return filenames
 
-    # Another example, Python 3.5+
-    # from pathlib import Path
-    # for path in Path(search_path).rglob(file_name):
-    #     print(path.name)
+# Another example, Python 3.5+
+def get_files_p35(search_path, file_name):
+    from pathlib import Path
+    filenames = []
+    for path in Path(search_path).rglob(file_name):
+        filenames.append(path)
+    return filenames
+
 
 def get_log(filename, format="csv"):
     try:
@@ -87,7 +91,7 @@ def plot_log_keys(log, job_name, smooth, xkeys=None, ykeys=None, title=None):
                 plot_xkey = xkey
 
             for iykey, ykey in enumerate(ykeys):
-                plot(xdata=plot_xdata, ydata=smooth_data(log[ykey], smooth), legend=job_name, subplot_id=(nxkeys, nykeys, nykeys*ixkey+iykey+1), xaxislabel=plot_xkey, fig_name='viz_csv', plot_name=title, yaxislabel=ykey, fig_size=(4*nykeys, 4*nxkeys))
+                simple_plot.plot(xdata=plot_xdata, ydata=smooth_data(log[ykey], smooth), legend=job_name, subplot_id=(nxkeys, nykeys, nykeys*ixkey+iykey+1), xaxislabel=plot_xkey, fig_name='viz_csv', plot_name=title, yaxislabel=ykey, fig_size=(4*nykeys, 4*nxkeys))
 
 
 # MAIN =========================================================

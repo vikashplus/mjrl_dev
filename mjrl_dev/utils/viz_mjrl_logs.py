@@ -112,7 +112,8 @@ def main():
         for i, exp_path in enumerate(exp_dir):
             job = get_job_data_txt(exp_path + '/job_data.txt')
             if job is None:
-                job = get_job_data_txt(exp_path + '/job_config.json')
+                job = get_job_data(exp_path + '/job_config.json')
+            assert job is not None, "Job not found at path:"+exp_path
             if 'horizon' not in job: job['horizon'] = 1
             log = get_log(exp_path + '/logs/log.csv')
             epochs = np.arange(len(log['stoc_pol_mean']))
