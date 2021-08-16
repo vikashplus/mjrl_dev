@@ -3,17 +3,17 @@ default:
     - override hydra/output: local
 
 # general inputs
-env               :   mjrl_point_mass-v0      # placeholder name
+env               :   FrankaReachFixed-v0     # placeholder name
 algorithm         :   NPG
 seed              :   123
 sample_mode       :   trajectories
 rl_num_traj       :   20
 rl_num_samples    :   0                       # will be ignored when sample_mode=trajectories
 num_cpu           :   4
-rl_num_iter       :   10
+rl_num_iter       :   200
 save_freq         :   5
 eval_rollouts     :   4
-exp_notes         :  'Keep notes of what this experiment is about. This is a demo config.'
+exp_notes         :  'mj_envs commit 750c0c41cd3ff5829bc09d734b635e9f6a029e34; mjrl v2'
 
 # RL parameters (all params related to PG, value function etc.)
 policy_size       :   (64, 64)
@@ -36,4 +36,4 @@ job_name          :   'job'
 
 hydra:
     job:
-        name: mjrl_npg_train_${env}
+        name: train_${algorithm}_${env}
