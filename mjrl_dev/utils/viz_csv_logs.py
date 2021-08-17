@@ -110,11 +110,13 @@ def main():
     parser.add_argument(
         '-l', '--label', action='append', nargs='?', help='job group label')
     parser.add_argument(
-        '-s', '--smooth', type=int, default=101, help='window for smoothing')
+        '-s', '--smooth', type=int, default=21, help='window for smoothing')
     parser.add_argument(
-        '-y', '--ykeys', nargs='+', default=["running_score", "success_rate"], help='yKeys to plot')
+        '-y', '--ykeys', nargs='+', default=["eval_score", "success_percentage"], help='yKeys to plot')
     parser.add_argument(
         '-x', '--xkeys', nargs='+', default=["iteration"], help='xKeys to plot')
+    parser.add_argument(
+        '-i', '--index', type=int, default=-4, help='index in log filename to use as labels')
     args = parser.parse_args()
 
     # scan labels
@@ -132,6 +134,7 @@ def main():
             #     job = get_job_data_txt(exp_path + '/job_data.txt')
 
             for log_file in get_files(exp_path, args.file):
+                print("Reading log: ", log_file)
                 log = get_log(filename=log_file, format=args.type)
 
                 # validate keys
@@ -140,13 +143,13 @@ def main():
 
                 # validate lables
                 if args.label[iexp] is '':
-                    job_name = exp_path.split('/')[-1]
+                    job_name = log_file.split('/')[args.index]
                 else:
                     job_name = args.label[iexp]#+str(i)
 
                 # plot keys
                 plot_log_keys(log, job_name, args.smooth, xkeys=args.xkeys, ykeys=args.ykeys, title=args.title)
-    show_plot()
+    simple_plot.show_plot()
 
 if __name__ == '__main__':
     main()
