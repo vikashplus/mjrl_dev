@@ -1,0 +1,1 @@
+python hydra_mjrl_launcher.py --multirun hydra/launcher=slurm hydra/output=slurm env=kitchen_micro_open-v3,kitchen_rdoor_open-v3,kitchen_ldoor_open-v3,kitchen_sdoor_open-v3,kitchen_light_on-v3,kitchen_knob4_on-v3,kitchen_knob3_on-v3,kitchen_knob2_on-v3,kitchen_knob1_on-v3
