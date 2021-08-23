@@ -1,6 +1,6 @@
 default:
-    - override hydra/launcher: local
     - override hydra/output: local
+    - override hydra/launcher: local
 
 # general inputs
 env               :   mjrl_point_mass-v0      # placeholder name
