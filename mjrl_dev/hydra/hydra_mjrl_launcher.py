@@ -11,7 +11,7 @@ from mjrl_job_script import train_loop
 # ===============================================================================
 # Process Inputs and configure job
 # ===============================================================================
-@hydra.main(config_name="franka_mjrl_config", config_path="config")
+@hydra.main(config_name="hydra_npg_config", config_path="config")
 def configure_jobs(job_data):
     print("========================================")
     print("Job Configuration")
