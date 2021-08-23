@@ -1,6 +1,10 @@
+import logging
 import hydra
 from omegaconf import DictConfig, OmegaConf, open_dict
 import os
+
+# A logger for this file
+log = logging.getLogger(__name__)
 
 @hydra.main(config_name="hydra_demo_config", config_path="config")
 def my_app(cfg : DictConfig) -> None:
@@ -8,8 +12,12 @@ def my_app(cfg : DictConfig) -> None:
     # add new configs
     with open_dict(cfg):
         cfg['new'] = 'new'
-    print(OmegaConf.to_yaml(cfg))
-    print("Resolved out_dir: "+cfg.exp.out_dir)
+
+    print("Passed configs ========")
+    print(OmegaConf.to_yaml(cfg, resolve=False))
+    print("Resolved configs ========")
+    print(OmegaConf.to_yaml(cfg, resolve=True))
+    log.info(OmegaConf.to_yaml(cfg, resolve=True))
 
     # save log in custom folder
     EXP_FILE = cfg.exp.out_dir+'/user.log'
