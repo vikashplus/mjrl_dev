@@ -1,0 +1,15 @@
+1000 iteratiosn, traning config from P453867085
+
+mj_envs: dfdd9d7807d2e00838932f6fb23bd9ff56e3e9f5 (dambrl)
+
+mjrl: 80ec7d77674314ad17a38fd237e5e32a497f4be2 (giri_concurrent_process_pool_v2)
+
+0fe8a446c5b580ec49f2458d68747fcebb191fc0 mj_envs/sims/Adroit (v0.1)
+30e0d1f7f2c89f016c4962da8c5a6c173579170c mj_envs/sims/YCB_sim (heads/main)
+b8531308fa34d2bd637d9df468455ae36e2ebcd3 mj_envs/sims/dmanus_sim (heads/master)
+f821a0f6c6739999019221124e1abc46f681113d mj_envs/sims/fetch_sim (heads/master)
+fb0239b53f57faaaad36b33bee42d659a10a9952 mj_envs/sims/franka_sim (v0.1)
+728819655acf40bb21fda51e6fbdd20e9ade4ee8 mj_envs/sims/furniture_sim (v0.1)
+06784b8c13b749150e78f17300388cc2cf4708f1 mj_envs/sims/neuromuscular_sim (v0.1-3-g06784b8)
+78424cd0fea6ca4e155c9faab801267363cdd4ff mj_envs/sims/sawyer_sim (heads/master)
+0585477aca9bf34cbbd2d4ee721ec56875f31d92 mj_envs/sims/scene_sim (heads/master)																																																										
