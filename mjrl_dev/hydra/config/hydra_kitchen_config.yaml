@@ -36,4 +36,4 @@ job_name          :   'job'
 
 hydra:
     job:
-        name: franka_comp_expert_${env}
+        name: {env}
