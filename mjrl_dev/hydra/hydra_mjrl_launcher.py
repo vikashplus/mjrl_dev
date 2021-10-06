@@ -36,7 +36,7 @@ def configure_jobs(job_data):
         print("Unknown sampling mode. Choose either trajectories or samples")
         exit()
 
-    print(OmegaConf.to_yaml(job_data))
+    print(OmegaConf.to_yaml(job_data, resolve=True))
     train_loop(job_data)
 
 if __name__ == "__main__":

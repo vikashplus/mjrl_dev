@@ -10,10 +10,10 @@ sample_mode       :   trajectories
 rl_num_traj       :   200
 rl_num_samples    :   0                       # will be ignored when sample_mode=trajectories
 num_cpu           :   10
-rl_num_iter       :   1001
+rl_num_iter       :   501
 save_freq         :   100
 eval_rollouts     :   10
-exp_notes         :  'Sample config for kitchen tasks'
+exp_notes         :  "Sample config for kitchen tasks"
 
 # RL parameters (all params related to PG, value function etc.)
 policy_size       :   (64, 64)
@@ -32,8 +32,8 @@ rl_gae            :   0.97
 alg_hyper_params  :   {'device': 'cpu'}
 
 # general outputs
-job_name          :   'job'
+job_name          :   "job"
 
 hydra:
     job:
-        name: {env}
+        name: ${env}
