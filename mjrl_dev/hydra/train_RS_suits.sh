@@ -28,6 +28,12 @@ elif [ "$1" == "biomechanics" ] ; then
 
     config="--config-name hydra_biomechanics_config.yaml $config"
 
+elif [ "$1" == "hand" ] ; then
+    # envs="door-v0,hammer-v0,pen-v0,relocate-v0,"
+    envs="baodingH200-v1,baoding4thH200-v1,baoding8thH200-v1,baodingH100-v1,baoding4thH100-v1,baoding8thH100-v1,baodingH60-v1,baoding4thH60-v1,baoding8thH60-v1"
+
+    config="--config-name hydra_hand_config.yaml $config"
+
 else
     # echo $help
     printf "$help"

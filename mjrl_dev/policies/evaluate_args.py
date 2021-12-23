@@ -32,7 +32,7 @@ def get_args(parser=None):
         'The path of the policy (.pickle) to execute. "saved" will load '
         'best_policy.pickle in the adept_envs/mjrl/policies directory.'
     ))
-    parser.add_argument('-m', '--mode', default='evaluation',
+    parser.add_argument('-m', '--mode', default='exploration',
         choices=['exploration', 'evaluation'], help=(
         'Whether to run the policy in exploration or evaluation mode.'
     ))

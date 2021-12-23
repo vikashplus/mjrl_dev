@@ -24,6 +24,7 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
     def __init__(self,
             rwd_keys = DEFAULT_REWARD_KEYS_AND_WEIGHTS,
             obs_keys = DEFAULT_OBS_KEYS_AND_WEIGHTS,
+            normalize_act = True,
             **kwargs):
 
         self.obs_keys = obs_keys
@@ -36,9 +37,11 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
         self.obj_sid = sim.model.site_name2id('obj')
         self.jnt_did = sim.model.jnt_dofadr[sim.model.joint_name2id('door_hinge')]
         self.prt_bid = sim.model.body_name2id('part')
-        # scales
+
+        # configure action space
         self.act_mid = np.mean(sim.model.actuator_ctrlrange, axis=1)
         self.act_rng = 0.5*(sim.model.actuator_ctrlrange[:,1]-sim.model.actuator_ctrlrange[:,0])
+        self.normalize_act = normalize_act
 
         # get env
         utils.EzPickle.__init__(self)
@@ -46,16 +49,17 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
         self.obs_dict = {}
         self.rwd_dict = {}
         mujoco_env.MujocoEnv.__init__(self, sim=sim, frame_skip=5)
-        self.action_space.low = -np.ones_like(self.action_space.low)
-        self.action_space.high = np.ones_like(self.action_space.high)
+        print(self.action_space.high, self.action_space.low)
+        if self.normalize_act:
+            self.action_space.high = np.ones_like(sim.model.actuator_ctrlrange[:,1])
+            self.action_space.low  = -1.0 * np.ones_like(sim.model.actuator_ctrlrange[:,0])
 
     # step the simulation forward
     def step(self, a):
-        a = np.clip(a, -1.0, 1.0)
-        try:
-            a = self.act_mid + a*self.act_rng # mean center and scale
-        except:
-            a = a                             # only for the initialization phase
+        # apply action and step
+        a = np.clip(a, low=self.action_space.low, high=self.action_space.high)
+        if normalize_act:
+            a = self.act_mid + a*self.act_rng
         self.do_simulation(a, self.frame_skip)
 
         # observation and rewards
@@ -102,7 +106,7 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
             'score': self.rwd_dict['score'][()],
             'solved': self.rwd_dict['solved'][()],
             'done': self.rwd_dict['done'][()],
-            'obs_dict': self.obs_dict,
+            'obs_dict': self.obs_dict.copy(),
             'rwd_dict': self.rwd_dict,
         }
         return env_info
@@ -187,7 +191,7 @@ class SampleEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, ObsVecDict):
         horizon = self.spec.max_episode_steps # paths could have early termination
         # success if door open for 25 steps
         for path in paths:
-            if np.sum(path['env_infos']['solved']) > 5:
+            if np.sum(path['env_infos']['solved'], dtype=np.int) > 5:
                 num_success += 1
         success_percentage = num_success*100.0/num_paths
 

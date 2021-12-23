@@ -17,6 +17,7 @@ import time
 from mjrl.samplers.core import do_rollout
 from mjrl_dev.utils.viz_paths import plot_horizon_distribution, plot_paths
 import numpy as np
+import mj_envs
 
 def main():
     # See evaluate_args.py for the list of args.
@@ -49,6 +50,7 @@ def main():
     mode = args.mode
     if args.policy == "":
         pol = MLP(e.spec, init_log_std=args.log_std)
+        print(args.log_std)
         mode = "exploration"
         policy = "random_policy.pickle"
     elif args.policy == "saved":
@@ -70,7 +72,7 @@ def main():
             print(pol.log_std_val)
             pol.log_std_val = pol.log_std_val + args.log_std
 
-    # print(pol.log_std_val)
+    print(pol.log_std_val)
 
     # dump rollouts
     if (args.num_samples > 0):
@@ -116,9 +118,9 @@ def main():
 
         # plot_horizon_distribution(paths, e, fileName_prefix=policy[:-7])
         plot_paths(paths, e, fileName_prefix=policy[:-7])
-        file_name = policy[:-7] + '_paths_{}.pickle'.format(time_stamp)
-        pickle.dump(paths, open(file_name, 'wb'))
-        print("saved ", file_name)
+        # file_name = policy[:-7] + '_paths_{}.pickle'.format(time_stamp)
+        # pickle.dump(paths, open(file_name, 'wb'))
+        # print("saved ", file_name)
 
     else:
         print

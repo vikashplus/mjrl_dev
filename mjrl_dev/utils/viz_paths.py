@@ -125,6 +125,22 @@ def plot_paths(paths, e=None, fileName_prefix=''):
             ax.axes.xaxis.set_ticklabels([])
             plt.ylabel('rewards')
             ax.yaxis.tick_right()
+        if e and hasattr(e.env.env, "rwd_keys_wt"):
+            ax = plt.subplot(nplt2, 2, 6)
+            ax.set_prop_cycle(None)
+            for key in e.env.env.rwd_keys_wt.keys():
+                plt.plot(
+                    path['env_infos']['time'],
+                    path['env_infos']['rwd_dict'][key]*e.env.env.rwd_keys_wt[key],
+                    label=key)
+            plt.legend(
+                loc='upper left',
+                fontsize='x-small',
+                bbox_to_anchor=(.75, 0.25),
+                borderaxespad=0.)
+            ax.axes.xaxis.set_ticklabels([])
+            plt.ylabel('wt*rewards')
+            ax.yaxis.tick_right()
 
         file_name = fileName_prefix + '_sample' + str(i) + '.pdf'
         plt.savefig(file_name)

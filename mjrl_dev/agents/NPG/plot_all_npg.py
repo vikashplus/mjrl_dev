@@ -65,7 +65,7 @@ def main():
     parser.add_argument(
         '-s', '--smooth', type=int, default=21, help='window for smoothing')
     parser.add_argument(
-        '-y', '--ykeys', nargs='+', default=['eval_score', 'rwd_sparse', 'success_percentage'], help='yKeys to plot')
+        '-y', '--ykeys', nargs='+', default=['rwd_dense', 'rwd_sparse', 'success_percentage'], help='yKeys to plot')
     parser.add_argument(
         '-x', '--xkey', default="num_samples", help='xKey to plot')
     parser.add_argument(
@@ -99,10 +99,9 @@ def main():
             title = env_dir.split('/')[args.index]
             # title = title[:title.find('-v')]
 
-            for log_file in sorted(get_files(env_dir, args.log_file)):
-                legend = log_file.split('/')[-4]
+            for ilog, log_file in enumerate(sorted(get_files(env_dir, args.log_file))):
+                legend = log_file.split('/')[-3][-6:]
                 log = get_log(filename=log_file, format="csv")
-
 
                 # validate keys
                 for key in [args.xkey]+args.ykeys:
@@ -126,8 +125,10 @@ def main():
                         plot_name=title,
                         yaxislabel=ykey,
                         fig_size=(4*nykeys, 3*nenv),
-                        fig_name='SAC performance'
+                        fig_name='NPG performance',
                         )
+        if ialgo >3:
+            break
     # simple_plot.show_plot()
     if args.job[0].endswith('/'):
         simple_plot.save_plot(args.job[0]+'RS-NPG.pdf')

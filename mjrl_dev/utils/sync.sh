@@ -12,6 +12,9 @@ elif [ "$1" == "local" ] && [ "$2" == "gcp" ] ; then
 elif [ "$1" == "local" ] && [ "$2" == "ec2" ] ; then
 	rsync -av --progress -e "ssh -i ~/aws/Vik.pem" --exclude='.git/' --exclude='*.pdf' --exclude='*.pickle' --exclude='*.csv' --exclude="__pycache__" ~/Libraries/$3/ ubuntu@$4:~/Libraries/$3/
 
+# local => devfair  ::  sync local devfair <code_path>
+elif [ "$1" == "local" ] && [ "$2" == "devfair" ] ; then
+	rsync -r -avz --partial --progress -e "ssh -p 1234" --exclude='.git/' --exclude="__pycache__" --exclude="*.DS_Store" ~/Libraries/$3/ localhost:~/Libraries/$3/
 
 # Berkeley => local  :: sync remote local <log_path>
 elif [ "$1" == "newton1" ] || [ "$1" == "newton2" ] || [ "$1" == "newton3" ] || [ "$1" == "newton4" ] || [ "$1" == "newton5" ] || [ "$1" == "newton6" ] || [ "$1" == "newton7" ] || [ "$1" == "allegrobase" ] ; then
@@ -28,6 +31,18 @@ elif [ "$1" == "gcp" ] && [ "$2" == "local" ] ; then
 # EC2 => local
 elif [ "$1" == "ec2" ] && [ "$2" == "local" ] ; then
 	rsync -av --progress -e "ssh -i ~/aws/Vik.pem" --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.out' ubuntu@$4:~/Projects/$3/ ~/Projects/$3/
+
+# devfair => local
+elif [ "$1" == "devfair" ] && [ "$2" == "local" ] ; then
+	rsync -r -avz --partial --progress -e "ssh -p 1234" --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.hydra' --exclude='*.out' --exclude='ferm/*' localhost:~/Projects/$3/ ~/Projects/$3/
+# elif [ "$1" == "devfair" ] && [ "$2" == "local" ] ; then
+# 	rsync -r -avz --partial --progress -e "ssh -p 1234" --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.out' --exclude='*.png' --include='*.log' --exclude='*/buffer/*.pt' --include='actor_2320000.pat' --include='critic_2320000.pat' --exclude='*.pt' --exclude='*/tb/*' --exclude='ferm/*' localhost:~/Projects/$3/ ~/Projects/$3/
+# FERM
+# elif [ "$1" == "devfair" ] && [ "$2" == "local" ] ; then
+	# rsync -r -avz --partial --progress -e "ssh -p 1234" --include='best_policy.pickle' --exclude='*.pickle' --include='eval.log' --include='log.csv' --include='args.json' --exclude='*.*' localhost:~/Projects/$3/ ~/Projects/$3/
+
+elif [ "$1" == "devfair-scp" ] && [ "$2" == "local" ] ; then
+	scp -r -o ProxyJump=snc-fairjmp201 100.97.72.99:~/Projects/$3 ~/Projects/$3
 
 # S3 => local
 elif [ "$1" == "s3:sac" ] && [ "$2" == "local" ] ; then
