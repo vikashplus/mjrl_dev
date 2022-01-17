@@ -1,5 +1,4 @@
 import numpy as np
-from IPython import embed
 from copy import deepcopy as copy
 import argparse
 
@@ -37,7 +36,7 @@ def obj2msh(obj_path, msh_path):
         [],
     )
 
-    vert_tex_dic = {}  # creat unique (vert,text) pairs
+    vert_tex_dic = {}  # create unique (vert,text) pairs
     msh_face_vert_indices = []  # face vert indices for msh file
 
     for line in lines:
@@ -68,6 +67,15 @@ def obj2msh(obj_path, msh_path):
                     temp.append(vert_tex_dic[(v, t)])
 
                 msh_face_vert_indices.append(copy(temp))
+
+
+    # Asset all indexes are +ve (-ve indexing not fully supported yet)
+    face_vertex_indices = np.array(face_vertex_indices)
+    assert np.any(face_vertex_indices>=0), "-ve indexing not fully supported yet"
+    face_text_indices = np.array(face_text_indices)
+    assert np.any(face_text_indices>=0), "-ve indexing not fully supported yet"
+    face_vertex_indices[face_vertex_indices<0] += len(vertex_positions)
+    face_text_indices[face_text_indices<0] += len(vertex_texcoords)
 
     # create vert and texture data for msh file
     msh_vertex_positions = [vertex_positions[i - 1] for i in face_vertex_indices]
@@ -110,8 +118,8 @@ def obj2msh(obj_path, msh_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Arguments for obj to msh file conversion")
-    parser.add_argument("--obj-path", type=str, help="path to obj file")
-    parser.add_argument("--msh-path", type=str, default=None, help="path to the save msh file")
+    parser.add_argument("-o", "--obj-path", type=str, help="path to obj file")
+    parser.add_argument("-m", "--msh-path", type=str, default=None, help="path to the save msh file")
     args = parser.parse_args()
     if args.msh_path is None:
         args.msh_path = args.obj_path[:-3]+'msh'

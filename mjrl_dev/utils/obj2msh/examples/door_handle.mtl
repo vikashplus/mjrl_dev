@@ -1,0 +1,16 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 16.01.2022 17:06:47
+
+newmtl cabinet_mixed
+	Ns 29.000000
+	Ni 1.500000
+	d 1.000000
+	Tr 0.000000
+	Tf 1.000000 1.000000 1.000000
+	illum 2
+	Ka 0.278431 0.152941 0.050980
+	Kd 0.278431 0.152941 0.050980
+	Ks 0.135000 0.135000 0.135000
+	Ke 0.000000 0.000000 0.000000
+	map_Ka door_handle.png
+	map_Kd door_handle.png
