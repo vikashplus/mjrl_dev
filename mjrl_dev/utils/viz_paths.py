@@ -2,7 +2,7 @@
 import numpy as np
 
 # Useful to check the horizon for teleOp / Hardware experiments
-def plot_horizon_distribution(paths, e, fileName_prefix=None):
+def plot_horizon_distribution(paths, env, fileName_prefix=None):
     import matplotlib as mpl
     mpl.use('TkAgg')
     import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ def plot_horizon_distribution(paths, e, fileName_prefix=None):
         # plot timesteps
         plt.clf()
 
-        rl_dt_ideal = e.env.env.frame_skip * e.env.env.model.opt.timestep
+        rl_dt_ideal = env.env.env.frame_skip * env.env.env.model.opt.timestep
         for i, path in enumerate(paths):
             dt = path['env_infos']['time'][1:] - path['env_infos']['time'][:-1]
             horizon[i] = path['env_infos']['time'][-1] - path['env_infos'][
@@ -44,7 +44,7 @@ def plot_horizon_distribution(paths, e, fileName_prefix=None):
         plt.clf()
         h1 = plt.plot(
             np.array([0, len(paths)]),
-            e.horizon * rl_dt_ideal * np.ones(2),
+            env.horizon * rl_dt_ideal * np.ones(2),
             'g',
             linewidth=5.0,
             label='ideal')
@@ -59,7 +59,7 @@ def plot_horizon_distribution(paths, e, fileName_prefix=None):
         print("Saved:", file_name)
 
 
-def plot_paths(paths, e=None, fileName_prefix=''):
+def plot_paths(paths, env=None, fileName_prefix=''):
     import matplotlib as mpl
     mpl.use('Agg')
     import matplotlib.pyplot as plt
@@ -90,7 +90,7 @@ def plot_paths(paths, e=None, fileName_prefix=''):
         nplt2 = 3
         ax = plt.subplot(nplt2, 2, 2)
         ax.set_prop_cycle(None)
-        # h4 = plt.plot(path['env_infos']['time'], e.env.env.act_mid + path['actions']*e.env.env.act_rng, '-', label='act') # plot scaled actions
+        # h4 = plt.plot(path['env_infos']['time'], env.env.env.act_mid + path['actions']*env.env.env.act_rng, '-', label='act') # plot scaled actions
         h4 = plt.plot(
             path['env_infos']['time'], path['actions'], '-',
             label='act')  # plot normalized actions
@@ -125,13 +125,13 @@ def plot_paths(paths, e=None, fileName_prefix=''):
             ax.axes.xaxis.set_ticklabels([])
             plt.ylabel('rewards')
             ax.yaxis.tick_right()
-        if e and hasattr(e.env.env, "rwd_keys_wt"):
+        if env and hasattr(env.env.env, "rwd_keys_wt"):
             ax = plt.subplot(nplt2, 2, 6)
             ax.set_prop_cycle(None)
-            for key in e.env.env.rwd_keys_wt.keys():
+            for key in env.env.env.rwd_keys_wt.keys():
                 plt.plot(
                     path['env_infos']['time'],
-                    path['env_infos']['rwd_dict'][key]*e.env.env.rwd_keys_wt[key],
+                    path['env_infos']['rwd_dict'][key]*env.env.env.rwd_keys_wt[key],
                     label=key)
             plt.legend(
                 loc='upper left',
