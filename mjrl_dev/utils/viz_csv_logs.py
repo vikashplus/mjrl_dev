@@ -3,6 +3,7 @@
 '''
 from vtils.plotting import simple_plot
 import json
+import yaml
 import numpy as np
 import argparse
 from scipy import signal
@@ -32,6 +33,9 @@ def get_log(filename, format="csv"):
             data = read_listofDicts(filename)
         elif format=="json":
             data = pandas.read_json(filename)
+        elif format=="yaml" or format=="yml":
+            with open(filename) as f:
+                data = yaml.safe_load(f)
     except Exception as e:
         print("WARNING: Can't read %s." % filename)
         quit()
@@ -73,7 +77,7 @@ def smooth_data(y, window_length=101, polyorder=3):
     except Exception as e:
         return y # nans
 
-def plot_log_keys(log, job_name, smooth, xkeys=None, ykeys=None, title=None):
+def plot_log_keys(log, job_name, smooth, xkeys=None, ykeys=None, title=None, args=None):
         # Default x data
         if xkeys is None:
             xkeys = ['epochs']
@@ -91,7 +95,7 @@ def plot_log_keys(log, job_name, smooth, xkeys=None, ykeys=None, title=None):
                 plot_xkey = xkey
 
             for iykey, ykey in enumerate(ykeys):
-                simple_plot.plot(xdata=plot_xdata, ydata=smooth_data(log[ykey], smooth), legend=job_name, subplot_id=(nxkeys, nykeys, nykeys*ixkey+iykey+1), xaxislabel=plot_xkey, fig_name='viz_csv', plot_name=title, yaxislabel=ykey, fig_size=(4*nykeys, 4*nxkeys))
+                simple_plot.plot(xdata=plot_xdata, ydata=smooth_data(log[ykey], smooth), legend=job_name, subplot_id=(nxkeys, nykeys, nykeys*ixkey+iykey+1), xaxislabel=plot_xkey, fig_name='viz_csv', plot_name=title, yaxislabel=ykey, fig_size=(4*nykeys, 4*nxkeys), xaxislimit=eval(args.xlim))
 
 
 # MAIN =========================================================
@@ -117,6 +121,8 @@ def main():
         '-x', '--xkeys', nargs='+', default=["iteration"], help='xKeys to plot')
     parser.add_argument(
         '-i', '--index', type=int, default=-4, help='index in log filename to use as labels')
+    parser.add_argument(
+        '-xl', '--xlim', type=str, default=None, help='max xlimit')
     args = parser.parse_args()
 
     # scan labels
@@ -148,7 +154,7 @@ def main():
                     job_name = args.label[iexp]#+str(i)
 
                 # plot keys
-                plot_log_keys(log, job_name, args.smooth, xkeys=args.xkeys, ykeys=args.ykeys, title=args.title)
+                plot_log_keys(log, job_name, args.smooth, xkeys=args.xkeys, ykeys=args.ykeys, title=args.title, args=args)
     simple_plot.show_plot()
 
 if __name__ == '__main__':
