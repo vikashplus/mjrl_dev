@@ -20,51 +20,6 @@ warnings.filterwarnings(
     action="ignore", module="scipy", message="^internal gelsd")
 from viz_csv_logs import *
 
-
-def get_results(filename):
-    results = []
-    try:
-        data = np.loadtxt(filename, skiprows=1)
-        results = {
-            'iter': data[:, 0],
-            'reward': data[:, 1],
-            'episode': data[:, -1]
-        }
-    except Exception as e:
-        print("WARNING: %s not found." % filename)
-    return results
-
-
-def get_log(filename):
-    try:
-        data = np.genfromtxt(filename, dtype=float, delimiter=',', names=True)
-    except Exception as e:
-        print("WARNING: %s not found." % filename)
-    return data
-
-
-# def get_job_data_txt(filename):
-#     try:
-#         info = open(filename)
-#         job = eval(info.read())
-#     except:
-#         print("WARNING: %s not found" % filename)
-#     return job
-
-
-# def smooth_data(y, window_length=101, polyorder=3):
-#     window_length = min(int(len(y) / 2),
-#                         window_length)  # set maximum valid window length
-#     # if window not off
-#     if window_length % 2 == 0:
-#         window_length = window_length + 1
-#     try:
-#         return signal.savgol_filter(y, window_length, polyorder)
-#     except:
-#         return y
-
-
-# MAIN =========================================================
 def main():
 
     # Parse arguments
@@ -110,12 +65,10 @@ def main():
         results_info = results_info + exp_info + '\n'
         cprint(exp_info, 'white', 'on_blue', attrs=['bold', 'underline'])
         for i, exp_path in enumerate(exp_dir):
-            job = get_job_data_txt(exp_path + '/job_data.txt')
-            if job is None:
-                job = get_job_data(exp_path + '/job_config.json')
+            job = get_log(exp_path + '/job_config.json', format='yaml')
             assert job is not None, "Job not found at path:"+exp_path
             if 'horizon' not in job: job['horizon'] = 1
-            log = get_log(exp_path + '/logs/log.csv')
+            log = get_log(exp_path + '/logs/log.csv', format='csv')
             epochs = np.arange(len(log['stoc_pol_mean']))
             samples = np.cumsum(log['num_samples']) #epochs * job['num_traj'] * job['horizon']
             # rewards
@@ -124,10 +77,9 @@ def main():
             ax7.plot(samples, reward, label=job['job_name'], linewidth=2)
 
             # score
-            # score = smooth_data(log['score'], window_length=args.smooth)/log['num_samples'] # no termination penalties, hence normalized by samples
-            if 'score' in log.dtype.names:
+            if 'score' in log.keys():
                 score = smooth_data(log['score'], window_length=args.smooth) # score/step is returned
-            elif 'rwd_sparse' in log.dtype.names:
+            elif 'rwd_sparse' in log.keys():
                 score = smooth_data(log['rwd_sparse'], window_length=args.smooth) # score/step is returned
             else:
                 score = np.zeros_like(reward)
@@ -135,9 +87,9 @@ def main():
 
             # Success percentage
             try:
-                if 'success_rate' in log.dtype.names:
+                if 'success_rate' in log.keys():
                     succ_p = smooth_data(log['success_rate'], window_length=args.smooth)
-                elif 'success_percentage' in log.dtype.names:
+                elif 'success_percentage' in log.keys():
                     succ_p = smooth_data(log['success_percentage'], window_length=args.smooth)
             except ValueError as e:
                 succ_p = np.zeros(len(reward))
@@ -169,7 +121,7 @@ def main():
 
             # gather records
             exp_info = '%30s   %3d   %+1.2f     %3d    %0.3f    %+.2f    %+.2f    %.1f%%' % (job['job_name'], job['seed'], \
-                job['init_std'], job['num_traj'], job['gamma'], reward[-1], score[-1], succ_p[-1])
+                job['init_log_std'], job['rl_num_traj'], job['rl_gamma'], reward[-1], score[-1], succ_p[-1])
             print(exp_info)
             results_info = results_info + exp_info + '\n'
 
@@ -248,7 +200,7 @@ def main():
         verticalalignment='top',
         horizontalalignment='center',
         fontproperties=font)
-    with PdfPages(job['env_name'] + '.pdf') as pdf:
+    with PdfPages(job['env'] + '.pdf') as pdf:
         pdf.savefig(fig)
         pdf.savefig(fig_text)
     plt.close()
