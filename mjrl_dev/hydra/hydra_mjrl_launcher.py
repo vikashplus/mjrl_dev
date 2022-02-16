@@ -23,7 +23,7 @@ def configure_jobs(job_data):
     assert any([job_data.sample_mode == m for m in ['samples', 'trajectories']])
     job_data.alg_hyper_params = dict() if 'alg_hyper_params' not in job_data.keys() else job_data.alg_hyper_params
 
-    with open('job_config.json', 'w') as fp:
+    with open('job_config.yaml', 'w') as fp:
         OmegaConf.save(config=job_data, f=fp.name)
 
     if job_data.sample_mode == 'trajectories':
