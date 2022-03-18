@@ -17,6 +17,7 @@ def configure_jobs(job_data):
     print("Job Configuration")
     print("========================================")
 
+    OmegaConf.resolve(job_data) # resolve configs
     assert 'algorithm' in job_data.keys()
     assert any([job_data.algorithm == a for a in ['NPG', 'NVPG', 'VPG', 'PPO']])
     assert 'sample_mode' in job_data.keys()
