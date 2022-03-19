@@ -24,7 +24,7 @@ if [ "$1" == "kitchen" ] ; then
     config="--config-name hydra_kitchen_config.yaml $config"
 
 elif [ "$1" == "myo" ] ; then
-    envs="motorFingerReachFixed-v0, motorFingerReachRandom-v0, myoFingerReachFixed-v0, myoFingerReachRandom-v0, myoHandReachFixed-v0, myoHandReachRandom-v0, motorFingerPoseFixed-v0, motorFingerPoseRandom-v0, myoFingerPoseFixed-v0, myoFingerPoseRandom-v0, myoElbowPose1D6MFixed-v0, myoElbowPose1D6MRandom-v0, myoElbowPose1D6MExoRandom-v0, myoElbowPose1D6MExoRandom-v0, myoHandPoseFixed-v0, myoHandPoseRandom-v0, myoHandKeyTurnFixed-v0, myoHandKeyTurnRandom-v0, myoHandObjHoldFixed-v0, myoHandObjHoldRandom-v0, myoHandPenTwirlFixed-v0, myoHandPenTwirlRandom-v0, myoHandBaodingFixed-v1, myoHandBaodingRandom-v1, myoHandBaodingFixed4th-v1, myoHandBaodingFixed8th-v1"
+    envs="motorFingerReachFixed-v0,motorFingerReachRandom-v0,myoFingerReachFixed-v0,myoFingerReachRandom-v0,myoHandReachFixed-v0,myoHandReachRandom-v0,motorFingerPoseFixed-v0,motorFingerPoseRandom-v0,myoFingerPoseFixed-v0,myoFingerPoseRandom-v0,myoElbowPose1D6MFixed-v0,myoElbowPose1D6MRandom-v0,myoElbowPose1D6MExoRandom-v0,myoElbowPose1D6MExoRandom-v0,myoHandPoseFixed-v0,myoHandPoseRandom-v0,myoHandKeyTurnFixed-v0,myoHandKeyTurnRandom-v0,myoHandObjHoldFixed-v0,myoHandObjHoldRandom-v0,myoHandPenTwirlFixed-v0,myoHandPenTwirlRandom-v0,myoHandBaodingFixed-v1,myoHandBaodingRandom-v1,myoHandBaodingFixed4th-v1,myoHandBaodingFixed8th-v1"
 
     config="--config-name hydra_myo_config.yaml $config"
 
