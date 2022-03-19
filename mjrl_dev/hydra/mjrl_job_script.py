@@ -19,8 +19,12 @@ import gym
 import mjrl.envs
 import time as timer
 import mj_envs
+from mj_envs.envs.env_variants import register_env_variant
 
 def train_loop(job_data) -> None:
+
+    if 'env_hyper_params' in job_data.keys():
+        job_data.env = register_env_variant(job_data.env, job_data.env_hyper_params)
 
     e = GymEnv(job_data.env)
     policy_size = tuple(eval(job_data.policy_size))
