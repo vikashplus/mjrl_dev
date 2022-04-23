@@ -1,8 +1,7 @@
 # Getting started with [Hydra](https://hydra.cc/)
 
 ## Installation
-1. install hydra `pip install hydra-core --upgrade`
-2. install [submitit](https://github.com/facebookincubator/submitit) launcher hydra plugin to launch jobs on cluster/ local `pip install hydra-submitit-launcher --upgrade`
+1. Install the dependnecies using `pip install -r requirements.txt`. We use Hydra as the config manager and the [submitit](https://github.com/facebookincubator/submitit) launcher plugin to launch jobs on cluster or locally.
 
 NOTE: FAIR cluster users should follow [hydra's internal guide](https://www.internalfb.com/intern/staticdocs/hydra/docs/fb/intro/) for installation
 
