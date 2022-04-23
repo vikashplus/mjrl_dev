@@ -36,4 +36,4 @@ job_name          :   "job"
 
 hydra:
     job:
-        name: ${env}
+        name: ${oc.env}

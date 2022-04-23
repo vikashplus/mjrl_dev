@@ -28,6 +28,6 @@ alg_hyper_params  :   {'device': 'cpu'}
 
 hydra:
     job:
-        name: ${env}
+        name: ${oc.env}
 
 
