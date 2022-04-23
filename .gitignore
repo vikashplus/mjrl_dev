@@ -132,3 +132,5 @@ dmypy.json
 .pyre/
 
 mjrl_dev/hydra/multirun/
+
+mjrl_dev/hydra/outputs/
