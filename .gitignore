@@ -130,3 +130,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+mjrl_dev/hydra/multirun/
+
+mjrl_dev/hydra/outputs/
