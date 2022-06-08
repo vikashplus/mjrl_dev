@@ -2,8 +2,8 @@
 
 ## Results
 Results are provided for two variants
-- DEMO_ENTRY_POINT (Fixed init)
-- RANDOM_ENTRY_POINT (Random init)
+- [DEMO_ENTRY_POINT (Fixed init)](outputs_kitchenJ5c_3.8)
+- [RANDOM_ENTRY_POINT (Random init)](outputs_kitchenJ5d_3.9)
 
 We notice that `random_init` performs on par with `fixed_init`. Moving forwards it makes sense to defaul to `random_init`. Inference (especially with relay datasets) will probably still need `fixed_init` to initialize in the demo distribution.
 
