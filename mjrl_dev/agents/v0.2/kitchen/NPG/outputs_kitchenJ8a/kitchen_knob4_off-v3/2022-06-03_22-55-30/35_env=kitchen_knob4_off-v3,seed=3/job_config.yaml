@@ -1,0 +1,32 @@
+default:
+- override hydra/output: local
+- override hydra/launcher: local
+env: kitchen_knob4_off-v3
+algorithm: NPG
+seed: 3
+sample_mode: trajectories
+rl_num_traj: 200
+rl_num_samples: 0
+num_cpu: 4
+rl_num_iter: 501
+save_freq: 100
+eval_rollouts: 10
+exp_notes: 'J0:Adding franka_appliance class. Adding random envs. Refactor multi_task_base_v1.
+  J2: Training DEMO_ENTRY_POINT. J3: Bugfix for horizon. J4: Sensor configs. J5: making
+  a train to commit the baselines 5b: random_entry_point. J6> Testing new microwave
+  position. J7: Random entry point redo post v0.2 update (serialization fix, env seed)+Franka_micro_open
+  H 75. J5d: ENTRY_POINT = RANDOM_ENTRY_POINT. 1a0ddda (HEAD -> v0.1dev, tag: v0.1,
+  origin/v0.1dev, origin/v0.1). J8:Baselines for v0.2'
+policy_size: (64, 64)
+init_log_std: -0.1
+min_log_std: -1.0
+vf_hidden_size: (128, 128)
+vf_batch_size: 64
+vf_epochs: 2
+vf_learn_rate: 0.001
+rl_step_size: 0.05
+rl_gamma: 0.995
+rl_gae: 0.97
+alg_hyper_params:
+  device: cpu
+job_name: job
