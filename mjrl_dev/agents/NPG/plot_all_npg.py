@@ -1,5 +1,5 @@
 ''' Use this script to comapare multiple results \n
-    Usage: python viz_resulyts.py -j expdir1_group0 expdir2_group0 -j expdir3_group1 expdir4_group1 -k "key1" "key2"...
+    Usage: python agents/NPG/plot_all_npg.py -j agents/v0.1/kitchen/NPG/outputs_kitchenJ5c_3.8/ -j agents/v0.1/kitchen/NPG/outputs_kitchenJ5d_3.9/ -j /Users/vikashplus/Projects/mj_envs/kitchen/outputs_kitchenJ8a/ -l 'v0.1(fixed_init)' -l 'v0.1(random_init)' -l 'v0.2(random_init)' -pt True
 '''
 from vtils.plotting import simple_plot
 import argparse
@@ -55,7 +55,7 @@ def main():
     parser.add_argument(
         '-j', '--job', required=True, action='append', nargs='?', help='job group')
     parser.add_argument(
-        '-lf', '--log_file', type=str, default="log.csv", help='name of log file (with extension)')
+        '-lf', '--run_log', type=str, default="log.csv", help='name of log file (with extension)')
     parser.add_argument(
         '-cf', '--config_file', type=str, default="job_config.json", help='name of config file (with extension)')
     parser.add_argument(
@@ -65,75 +65,112 @@ def main():
     parser.add_argument(
         '-s', '--smooth', type=int, default=21, help='window for smoothing')
     parser.add_argument(
-        '-y', '--ykeys', nargs='+', default=['rwd_dense', 'rwd_sparse', 'success_percentage'], help='yKeys to plot')
+        '-y', '--ykeys', nargs='+', default=['success_percentage', 'rwd_sparse', 'rwd_dense'], help='yKeys to plot')
     parser.add_argument(
         '-x', '--xkey', default="num_samples", help='xKey to plot')
     parser.add_argument(
-        '-i', '--index', type=int, default=-2, help='index in log filename to use as labels')
+        '-ei', '--env_index', type=int, default=-2, help='index in log filename to use as labels')
+    parser.add_argument(
+        '-pt', '--plot_train', type=bool, default=False, help='plot train perf')
     args = parser.parse_args()
+
+    # init
+    nykeys = len(args.ykeys)
+    njob = len(args.job)
+    nenv = -1
+    env_labels = []
 
     # scan labels
     if args.label is not None:
-        assert (len(args.job) == len(args.label)), "The number of labels has to be same as the number of jobs"
+        assert (njob == len(args.label)), "The number of labels has to be same as the number of jobs"
     else:
-        args.label = [''] * len(args.job)
+        args.label = [''] * njob
 
-    # for all the algo jobs
-    for ialgo, algo_dir in enumerate(sorted(args.job)):
-        print("algo> "+algo_dir)
-        envs_dirs = glob.glob(algo_dir+"/*/")
-        # for all envs inside the algo
-        nenv = len(envs_dirs)
+    # for all the jobs
+    for ijob, job_dir in enumerate(args.job):
+        print("Job> "+job_dir)
+        envs_dirs = glob.glob(job_dir+"/*/")
+        if nenv ==-1:
+            nenv = len(envs_dirs)
+        else:
+            assert nenv == len(envs_dirs), "Number of envs changed"
+        for env_dir in sorted(envs_dirs):
+            env_labels.append(env_dir.split('/')[args.env_index])
+
+        # for all envs inside the exp
+        env_means = []
+        env_stds = []
         for ienv, env_dir in enumerate(sorted(envs_dirs)):
-            print("env>> "+env_dir)
-            run_dirs = glob.glob(env_dir+"/*/")
+            print("  env> "+env_dir)
 
-            # all the seeds/ variations within the env
-            # for irun, run_dir in enumerate(sorted(run_dirs)):
-            #     print("run> "+run_dir)
-            #     title = run_dir.split('/')[args.index]
-            #     title = title[:title.find('-v')]
-            #     log_file = get_files(run_dir, args.log_file)
-            #     log = get_log(filename=log_file[0], format="csv")
-
-            title = env_dir.split('/')[args.index]
-            # title = title[:title.find('-v')]
-
-            for ilog, log_file in enumerate(sorted(get_files(env_dir, args.log_file))):
-                legend = log_file.split('/')[-3][-6:]
-                log = get_log(filename=log_file, format="csv")
+            # all the seeds/ variations runs within the env
+            yruns = []
+            for irun, run_log in enumerate(sorted(get_files(env_dir, args.run_log))):
+                print("    run> "+run_log)
+                log = get_log(filename=run_log, format="csv")
 
                 # validate keys
                 for key in [args.xkey]+args.ykeys:
                     assert key in log.keys(), "{} not present in available keys {}".format(key, log.keys())
-
                 if 'sample' in args.xkey: #special keys
                     xdata = np.cumsum(log[args.xkey])/1e6
                     plot_xkey = args.xkey+"(M)"
                 else:
                     xdata = log[args.xkey]
                     plot_xkey = args.xkey
+                yruns.append(log[args.ykeys])
+                del log
 
+            # stats over keys
+            yruns = pandas.concat(yruns)
+            yruns_stacked = yruns.groupby(yruns.index)
+            yruns_mean = yruns_stacked.mean()
+            yruns_min = yruns_stacked.min()
+            yruns_max = yruns_stacked.max()
+            yruns_std = yruns_stacked.std()
 
-                nykeys =  len(args.ykeys)
+            # stats over jobs
+            env_means.append(yruns_mean.tail(1))
+            env_stds.append(yruns_std.tail(1))
+
+            if args.plot_train:
                 for iykey, ykey in enumerate(sorted(args.ykeys)):
-                    simple_plot.plot(xdata=xdata,
-                        ydata=smooth_data(log[ykey], args.smooth),
-                        legend=legend,
-                        subplot_id=(nenv, nykeys, nykeys*ienv+iykey+1),
-                        xaxislabel=plot_xkey,
-                        plot_name=title,
-                        yaxislabel=ykey,
-                        fig_size=(4*nykeys, 3*nenv),
-                        fig_name='NPG performance',
-                        )
-        if ialgo >3:
-            break
-    # simple_plot.show_plot()
-    if args.job[0].endswith('/'):
-        simple_plot.save_plot(args.job[0]+'RS-NPG.pdf')
-    else:
-        simple_plot.save_plot(args.job[0]+'/RS-NPG.pdf')
+                    h_figp,_,_= simple_plot.plot(xdata=xdata,
+                            ydata=smooth_data(yruns_mean[ykey], args.smooth),
+                            errmin=yruns_min[ykey],
+                            errmax=yruns_max[ykey],
+                            legend=args.label[ijob],
+                            subplot_id=(nenv, nykeys, nykeys*ienv+iykey+1),
+                            xaxislabel=plot_xkey,
+                            plot_name=env_labels[ienv],
+                            yaxislabel=ykey,
+                            fig_size=(4*nykeys, 3*nenv),
+                            fig_name='NPG performance',
+                            )
+
+        env_means = pandas.concat(env_means)
+        env_stds = pandas.concat(env_stds)
+        width = 1/(njob+1)
+
+        for iykey, ykey in enumerate(sorted(args.ykeys)):
+            h_figb, h_axisb, h_bar = simple_plot.bar(
+                xdata=np.arange(nenv)+width*ijob,
+                ydata=env_means[ykey],
+                errdata=env_stds[ykey],
+                width=width,
+                subplot_id=(nykeys, 1, iykey+1),
+                fig_size=(2+0.2*nenv, 4*nykeys),
+                fig_name="Env perfs",
+                yaxislabel=ykey,
+                legend=args.label[ijob],
+                xticklabels=env_labels[:nenv],
+                # plot_name="Performance using 5M samples"
+                )
+
+    sl = '' if args.job[0].endswith('/') else '/'
+    if args.plot_train:
+        simple_plot.save_plot(args.job[0]+sl+'TrainPerf-NPG.pdf', h_figp)
+    simple_plot.save_plot(args.job[0]+sl+'FinalPerf-NPG.pdf', h_figb)
 
 
 if __name__ == '__main__':
