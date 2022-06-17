@@ -13,7 +13,7 @@ Comparision: V0.2 vs V0.1 (5M samples, 3 seeds)
 
 
 ## Known Issues
-- N/A
+- Performance on `kitchen_ldoor_close-v3` was found to be seed sensitive. Addional runs with more seeds were added for this env.
 
 ## Hashes
 ```

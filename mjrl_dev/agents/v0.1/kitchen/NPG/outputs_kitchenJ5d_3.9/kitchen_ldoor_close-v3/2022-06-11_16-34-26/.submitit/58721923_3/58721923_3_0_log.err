@@ -1,0 +1,7 @@
+/private/home/vikashplus/.conda/envs/mjrl-gpu-env/lib/python3.7/site-packages/omegaconf/resolvers/__init__.py:13: UserWarning: The `env` resolver is deprecated, see https://github.com/omry/omegaconf/issues/573
+  "The `env` resolver is deprecated, see https://github.com/omry/omegaconf/issues/573"
+/private/home/vikashplus/.conda/envs/mjrl-gpu-env/lib/python3.7/site-packages/hydra/core/utils.py:97: UserWarning: 
+run_job's signature has changed in Hydra 1.1. Please pass in hydra_context.
+Support for the old style will be removed in Hydra 1.2.
+For more info, check https://github.com/facebookresearch/hydra/pull/1581.
+  For more info, check https://github.com/facebookresearch/hydra/pull/1581."""
