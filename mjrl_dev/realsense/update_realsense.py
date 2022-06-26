@@ -8,7 +8,7 @@ from PIL import Image
 
 height_field_range = (.1, .5)
 
-model_path = '/Users/vikashplus/Libraries/phy_sim/realsense/realsense.xml'
+model_path = 'realsense.xml'
 rs_data = pickle.load(open('realsense_rgbd.pkl', 'rb'))
 
 model = load_model_from_path(model_path)
