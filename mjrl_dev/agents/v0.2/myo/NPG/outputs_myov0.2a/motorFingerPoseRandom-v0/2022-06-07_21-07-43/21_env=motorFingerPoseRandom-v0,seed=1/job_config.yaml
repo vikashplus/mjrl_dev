@@ -1,0 +1,27 @@
+default:
+- override hydra/output: local
+- override hydra/launcher: local
+env: motorFingerPoseRandom-v0
+algorithm: NPG
+seed: 1
+sample_mode: trajectories
+rl_num_traj: 96
+rl_num_samples: 0
+num_cpu: 16
+rl_num_iter: 5001
+save_freq: 100
+eval_rollouts: 16
+exp_notes: 'J15a: V0.2dev baselines'
+policy_size: (32, 32)
+init_log_std: -0.25
+min_log_std: -1.0
+vf_hidden_size: (128, 128)
+vf_batch_size: 64
+vf_epochs: 2
+vf_learn_rate: 0.001
+rl_step_size: 0.1
+rl_gamma: 0.995
+rl_gae: 0.97
+alg_hyper_params:
+  device: cpu
+job_name: npg_motorFingerPoseRandom-v0
