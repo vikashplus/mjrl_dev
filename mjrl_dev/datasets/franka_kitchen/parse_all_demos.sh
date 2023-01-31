@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for d in $(ls ./kitchen_demos_multitask/); 
+for d in $(ls ./kitchen_demos_multitask/);
 do
     echo $d
     python utils/parse_demos.py \

@@ -19,11 +19,10 @@ import glob
 import pickle
 import numpy as np
 from parse_mjl import parse_mjl_logs, viz_parsed_mjl_logs
-from mjrl.utils.gym_env import GymEnv
-from mj_envs.utils.quatmath import quat2euler
+from mj_envs.utils.quat_math import quat2euler
 import mj_envs
 import time as timer
-# import skvideo.io
+import skvideo.io
 import gym
 
 from tqdm import tqdm
@@ -81,6 +80,7 @@ def render_demos(env, data, filename='demo_rendering.mp4', render=None):
 
     viewer(env, mode='save', filename=filename, render=render)
     print("time taken = %f" % (timer.time() - t0))
+
 
 # playback demos and get data(physics respected)
 def gather_training_data(env, data, filename='demo_playback.mp4', render=None, kettle_joint='6dof'):
@@ -173,25 +173,13 @@ def gather_training_data(env, data, filename='demo_playback.mp4', render=None, k
 # MAIN =========================================================
 @click.command(help="parse tele-op demos")
 @click.option('--env', '-e', type=str, help='gym env name', required=True)
-@click.option(
-    '--demo_dir',
-    '-d',
-    type=str,
-    help='directory with tele-op logs',
-    required=True)
-@click.option(
-    '--skip',
-    '-s',
-    type=int,
-    help='number of frames to skip (1:no skip)',
-    default=1)
+@click.option('--demo_dir', '-d', type=str, help='directory with tele-op logs', required=True)
+@click.option( '--skip', '-s', type=int, help='number of frames to skip (1:no skip)', default=1)
 @click.option('--graph', '-g', type=bool, help='plot logs', default=False)
 @click.option('--save_logs', '-l', type=bool, help='save logs', default=False)
 @click.option('--save_demos', '-d', type=bool, help='save demos', default=True)
-@click.option(
-    '--view', '-v', type=str, help='render/playback', default='render')
-@click.option(
-    '--render', '-r', type=str, help='onscreen/offscreen', default='onscreen')
+@click.option('--view', '-v', type=str, help='render/playback', default='render')
+@click.option('--render', '-r', type=str, help='onscreen/offscreen', default='onscreen')
 @click.option('--kettle_joint', type=str, help='type of kettle joint, options are free and 6dof', default='6dof')
 
 def main(env, demo_dir, skip, graph, save_logs, save_demos, view, render, kettle_joint):
@@ -219,6 +207,14 @@ def main(env, demo_dir, skip, graph, save_logs, save_demos, view, render, kettle
 
         # render logs to video
         if view == 'render':
+            # fix data based on kettle joint config
+            if kettle_joint == 'free':
+                data['qpos'] = data['qpos'] # no-op
+            elif kettle_joint == '6dof' or kettle_joint == '3s3h':
+                data['qpos_orig'] = data['qpos']
+                data['qpos'] = data['qpos_orig'][:,:-1]
+                data['qpos'][:,-3:] = quat2euler(data['qpos_orig'][:,-4:])
+
             render_demos(
                 gym_env,
                 data,
