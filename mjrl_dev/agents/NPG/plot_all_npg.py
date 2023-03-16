@@ -7,6 +7,7 @@ from scipy import signal
 import pandas
 import glob
 import numpy as np
+import os
 
 def get_files(search_path, file_name):
     search_path = search_path[:-1] if search_path.endswith('/') else search_path
@@ -72,6 +73,8 @@ def main():
         '-ei', '--env_index', type=int, default=-2, help='index in log filename to use as labels')
     parser.add_argument(
         '-pt', '--plot_train', type=bool, default=False, help='plot train perf')
+    parser.add_argument(
+        '-od', '--output_dir', type=str, default=None, help='Save outputs here')
     args = parser.parse_args()
 
     # init
@@ -167,10 +170,10 @@ def main():
                 # plot_name="Performance using 5M samples"
                 )
 
-    sl = '' if args.job[0].endswith('/') else '/'
+    args.output_dir = args.job[-1] if args.output_dir == None else args.output_dir
     if args.plot_train:
-        simple_plot.save_plot(args.job[0]+sl+'TrainPerf-NPG.pdf', h_figp)
-    simple_plot.save_plot(args.job[0]+sl+'FinalPerf-NPG.pdf', h_figb)
+        simple_plot.save_plot(os.path.join(args.output_dir, 'TrainPerf-NPG.pdf'), h_figp)
+    simple_plot.save_plot(os.path.join(args.output_dir,'FinalPerf-NPG.pdf'), h_figb)
 
 
 if __name__ == '__main__':

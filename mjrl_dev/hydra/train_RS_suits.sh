@@ -23,7 +23,7 @@ if [ "$1" == "kitchen" ] ; then
 
     config="--config-name hydra_kitchen_config.yaml $config"
 
-if [ "$1" == "kitchen-v4" ] ; then
+elif [ "$1" == "kitchen-v4" ] ; then
     envs="FK1_RelaxRandom-v4 FK1_MicroOpenRandom-v4 FK1_MicroCloseRandom-v4 FK1_RdoorOpenRandom-v4 FK1_RdoorCloseRandom-v4 FK1_LdoorOpenRandom-v4 FK1_LdoorCloseRandom-v4 FK1_SdoorOpenRandom-v4 FK1_SdoorCloseRandom-v4 FK1_LightOnRandom-v4 FK1_LightOffRandom-v4 FK1_Knob4OnRandom-v4 FK1_Knob4OffRandom-v4 FK1_Knob3OnRandom-v4 FK1_Knob3OffRandom-v4 FK1_Knob2OnRandom-v4 FK1_Knob2OffRandom-v4 FK1_Knob1OnRandom-v4 FK1_Knob1OffRandom-v4 FK1_Stove1KettleRandom-v4 FK1_Stove4KettleRandom-v4"
 
     config="--config-name hydra_kitchen_config.yaml $config"
