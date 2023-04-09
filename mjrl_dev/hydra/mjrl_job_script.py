@@ -7,12 +7,13 @@ Separate job scripts are provided to run few other algorithms
 
 from mjrl.utils.gym_env import GymEnv
 from mjrl.policies.gaussian_mlp import MLP
-from mjrl.baselines.quadratic_baseline import QuadraticBaseline
 from mjrl.baselines.mlp_baseline import MLPBaseline
 from mjrl.algos.npg_cg import NPG
 from mjrl.algos.batch_reinforce import BatchREINFORCE
 from mjrl.algos.ppo_clip import PPO
 from mjrl.utils.train_agent import train_agent
+from mjrl.utils.logger import DataLog
+
 import os
 import json
 import gym
@@ -56,6 +57,10 @@ def train_loop(job_data) -> None:
         agent = PPO(e, policy, baseline, save_logs=True, **job_data.alg_hyper_params)
     else:
         NotImplementedError("Algorithm not found")
+
+    # Update logger if WandB in Config
+    if 'wandb_params' in job_data.keys() and job_data['wandb_params']['use_wandb']==True:
+        agent.logger = DataLog(**job_data['wandb_params'], wandb_config=job_data)
 
     print("========================================")
     print("Starting policy learning")

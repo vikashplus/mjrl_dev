@@ -13,6 +13,14 @@ domain:
   env: swimmer-v0
   api: openaiGym
 
+job_name          :   npg_${domain.env}
+
+wandb_params:
+    use_wandb     : True
+    wandb_user    : vikashplus
+    wandb_project : mjrl_test
+    wandb_exp     : ${job_name}
+
 hydra:
     job:
         name: hydra_demo_${domain.api}_${domain.env}_${exp.seed}

@@ -1,7 +1,7 @@
 # @package _global_
 hydra:
     launcher:
-        cpus_per_task: 16
+        cpus_per_task: 24
         gpus_per_node: 0
         tasks_per_node: 1
         timeout_min: 4320
