@@ -14,7 +14,7 @@ elif [ "$1" == "local" ] && [ "$2" == "ec2" ] ; then
 
 # local => devfair  ::  sync local devfair <code_path>
 elif [ "$1" == "local" ] && [ "$2" == "devfair" ] ; then
-	rsync -r -avz --partial --progress -e "ssh -p 1234" --exclude='.git/' --exclude="__pycache__" --exclude="*.DS_Store" ~/Libraries/$3/ localhost:~/Libraries/$3/
+	rsync -r -avz --partial --progress -e "ssh -p 1234" --exclude "datasets" --exclude "outputs" --exclude='.git/' --exclude="__pycache__" --exclude="*.DS_Store" ~/Libraries/$3/ localhost:~/Libraries/$3/
 
 # Berkeley => local  :: sync remote local <log_path>
 elif [ "$1" == "newton1" ] || [ "$1" == "newton2" ] || [ "$1" == "newton3" ] || [ "$1" == "newton4" ] || [ "$1" == "newton5" ] || [ "$1" == "newton6" ] || [ "$1" == "newton7" ] || [ "$1" == "allegrobase" ] ; then
@@ -22,7 +22,7 @@ elif [ "$1" == "newton1" ] || [ "$1" == "newton2" ] || [ "$1" == "newton3" ] || 
 
 # UW => local
 elif ( [ "$1" == "bundle" ]  || [ "$1" == "voltron" ] ) && [ "$2" == "local" ] ; then
-	sshpass -p handrobot1! rsync -av --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.out' vikash@$1.cs.washington.edu:~/Projects/$3 ~/Projects/
+	rsync -av --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.out' vikash@$1.cs.washington.edu:~/Projects/$3 ~/Projects/
 
 # GCP => local
 elif [ "$1" == "gcp" ] && [ "$2" == "local" ] ; then
@@ -34,7 +34,7 @@ elif [ "$1" == "ec2" ] && [ "$2" == "local" ] ; then
 
 # devfair => local
 elif [ "$1" == "devfair" ] && [ "$2" == "local" ] ; then
-	rsync -r -avz --partial --progress -e "ssh -p 1234" --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.hydra' --exclude='*.out' --exclude='ferm/*' localhost:~/Projects/$3/ ~/Projects/$3/
+	rsync -r -avz --partial --progress -e "ssh -p 1234" --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.hydra' --exclude='*.out' --exclude='ferm/*' --exclude='**/wandb/**' localhost:~/Projects/$3/ ~/Projects/$3/
 # elif [ "$1" == "devfair" ] && [ "$2" == "local" ] ; then
 # 	rsync -r -avz --partial --progress -e "ssh -p 1234" --include='best_policy.pickle' --exclude='*.pickle' --exclude='*.out' --exclude='*.png' --include='*.log' --exclude='*/buffer/*.pt' --include='actor_2320000.pat' --include='critic_2320000.pat' --exclude='*.pt' --exclude='*/tb/*' --exclude='ferm/*' localhost:~/Projects/$3/ ~/Projects/$3/
 # FERM

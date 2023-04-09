@@ -24,7 +24,7 @@ if [ "$1" == "kitchen" ] ; then
     config="--config-name hydra_kitchen_config.yaml $config"
 
 elif [ "$1" == "kitchen-v4" ] ; then
-    envs="FK1_RelaxRandom-v4 FK1_MicroOpenRandom-v4 FK1_MicroCloseRandom-v4 FK1_RdoorOpenRandom-v4 FK1_RdoorCloseRandom-v4 FK1_LdoorOpenRandom-v4 FK1_LdoorCloseRandom-v4 FK1_SdoorOpenRandom-v4 FK1_SdoorCloseRandom-v4 FK1_LightOnRandom-v4 FK1_LightOffRandom-v4 FK1_Knob4OnRandom-v4 FK1_Knob4OffRandom-v4 FK1_Knob3OnRandom-v4 FK1_Knob3OffRandom-v4 FK1_Knob2OnRandom-v4 FK1_Knob2OffRandom-v4 FK1_Knob1OnRandom-v4 FK1_Knob1OffRandom-v4 FK1_Stove1KettleRandom-v4 FK1_Stove4KettleRandom-v4"
+    envs="FK1_RelaxRandom-v4,FK1_MicroOpenRandom-v4,FK1_MicroCloseRandom-v4,FK1_RdoorOpenRandom-v4,FK1_RdoorCloseRandom-v4,FK1_LdoorOpenRandom-v4,FK1_LdoorCloseRandom-v4,FK1_SdoorOpenRandom-v4,FK1_SdoorCloseRandom-v4,FK1_LightOnRandom-v4,FK1_LightOffRandom-v4,FK1_Knob4OnRandom-v4,FK1_Knob4OffRandom-v4,FK1_Knob3OnRandom-v4,FK1_Knob3OffRandom-v4,FK1_Knob2OnRandom-v4,FK1_Knob2OffRandom-v4,FK1_Knob1OnRandom-v4,FK1_Knob1OffRandom-v4,FK1_Stove1KettleRandom-v4,FK1_Stove4KettleRandom-v4"
 
     config="--config-name hydra_kitchen_config.yaml $config"
 
@@ -35,10 +35,10 @@ elif [ "$1" == "myo" ] ; then
 
     config="--config-name hydra_myo_config.yaml $config"
 
-elif [ "$1" == "hand" ] ; then
+elif [ "$1" == "hands" ] ; then
     envs="pen-v1,door-v1,hammer-v1,relocate-v1,baoding-v1,baoding4th-v1,baoding8th-v1"
 
-    envs+=",pen-v0,door-v0,hammer-v0,relocate-v0,baoding-v0"
+    # envs+=",pen-v0,door-v0,hammer-v0,relocate-v0,baoding-v0"
 
     # envs="baodingH200-v1,baoding4thH200-v1,baoding8thH200-v1,baodingH100-v1,baoding4thH100-v1,baoding8thH100-v1,baodingH60-v1,baoding4thH60-v1,baoding8thH60-v1"
 

@@ -122,7 +122,7 @@ def main():
     parser.add_argument(
         '-i', '--index', type=int, default=-4, help='index in log filename to use as labels')
     parser.add_argument(
-        '-xl', '--xlim', type=str, default=None, help='max xlimit')
+        '-xl', '--xlim', type=str, default="None", help='max xlimit')
     args = parser.parse_args()
 
     # scan labels
