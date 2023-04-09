@@ -1,0 +1,4 @@
+- env_args.from_pixels=False
+- algos=sac
+- env=elbow1D1MRandom-v0
+- seed=12

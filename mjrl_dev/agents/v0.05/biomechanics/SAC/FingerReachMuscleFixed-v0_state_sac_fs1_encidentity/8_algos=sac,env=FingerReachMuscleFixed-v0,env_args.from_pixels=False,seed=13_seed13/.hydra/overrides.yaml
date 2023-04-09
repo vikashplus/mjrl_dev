@@ -1,0 +1,4 @@
+- env_args.from_pixels=False
+- algos=sac
+- env=FingerReachMuscleFixed-v0
+- seed=13

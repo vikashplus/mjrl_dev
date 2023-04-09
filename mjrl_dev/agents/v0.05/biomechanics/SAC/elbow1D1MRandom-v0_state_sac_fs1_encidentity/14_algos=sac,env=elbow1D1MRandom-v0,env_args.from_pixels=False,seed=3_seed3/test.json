@@ -1,0 +1,18 @@
+{
+  "Scaler": "Standard",
+  "family_min_samples_percentage": 5,
+  "original_number_of_clusters": 4,
+  "eps_value": 0.1,
+  "min_samples": 5,
+  "number_of_clusters": 9,
+  "number_of_noise_samples": 72,
+  "adjusted_rand_index": 0.001,
+  "adjusted_mutual_info_score": 0.009,
+  "homogeneity_score": 0.330,
+  "completeness_score": 0.999,
+  "v_measure_score": 0.497,
+  "fowlkes_mallows_score": 0.0282,
+  "silhouette_coefficient": 0.653,
+  "calinski_harabasz_score": 10.81,
+  "davies_bouldin_score": 1.70
+}

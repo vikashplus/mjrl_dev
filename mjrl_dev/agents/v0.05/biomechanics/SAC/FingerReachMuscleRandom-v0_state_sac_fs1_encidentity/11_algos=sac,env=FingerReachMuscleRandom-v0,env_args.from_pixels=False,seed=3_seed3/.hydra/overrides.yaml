@@ -1,0 +1,4 @@
+- env_args.from_pixels=False
+- algos=sac
+- env=FingerReachMuscleRandom-v0
+- seed=3

@@ -1,0 +1,72 @@
+algos:
+  algo: sac
+  num_train_steps: 3000000.0
+  replay_buffer_capacity: ${algos.num_train_steps}
+  num_seed_steps: 5000
+  eval_frequency: 20000
+  num_eval_episodes: 25
+  device: cuda
+  log_frequency: 10000
+  log_save_tb: false
+  save_video: false
+  save_model: false
+  save_actor: false
+  agent:
+    obs_dim: null
+    action_dim: null
+    action_range: null
+    device: ${algos.device}
+    critic_cfg: ${algos.double_q_critic}
+    actor_cfg: ${algos.diag_gaussian_actor}
+    discount: 0.99
+    init_temperature: 0.1
+    alpha_lr: 0.0001
+    alpha_betas:
+    - 0.9
+    - 0.999
+    actor_lr: 0.0001
+    actor_betas:
+    - 0.9
+    - 0.999
+    actor_update_frequency: 1
+    critic_lr: 0.0001
+    critic_betas:
+    - 0.9
+    - 0.999
+    critic_tau: 0.005
+    critic_target_update_frequency: 2
+    batch_size: 1024
+    learnable_temperature: true
+  double_q_critic:
+    _target_: vrl.algos.pytorch_sac.agent.critic.DoubleQCritic
+    obs_dim: ${algos.agent.obs_dim}
+    action_dim: ${algos.agent.action_dim}
+    hidden_dim: 1024
+    hidden_depth: 2
+  diag_gaussian_actor:
+    _target_: vrl.algos.pytorch_sac.agent.actor.DiagGaussianActor
+    obs_dim: ${algos.agent.obs_dim}
+    action_dim: ${algos.agent.action_dim}
+    hidden_depth: 2
+    hidden_dim: 1024
+    log_std_bounds:
+    - -5
+    - 2
+env: elbow1D6MRandom-v0
+seed: 11
+env_args:
+  env_name: ${env}
+  seed: ${seed}
+  from_pixels: false
+  hybrid_state: false
+  cameras:
+  - track
+  width: 256
+  height: 256
+  channels_first: false
+  frame_stack: 1
+encoder_args:
+  encoder_type: identity
+  env_name: ${env}
+experiment: state
+env_dir: ${env}_${experiment}_${algos.algo}_fs${env_args.frame_stack}_enc${encoder_args.encoder_type}

@@ -1,0 +1,170 @@
+hydra:
+  run:
+    dir: /checkpoint/${env:USER}/outputs_vrl26bm/${env_dir}
+    subdir: ${hydra.job.num}_${hydra.job.override_dirname}_seed${seed}
+  sweep:
+    dir: /checkpoint/${env:USER}/outputs_vrl26bm/${env_dir}
+    subdir: ${hydra.job.num}_${hydra.job.override_dirname}_seed${seed}
+  launcher:
+    cpus_per_task: 12
+    gpus_per_node: 1
+    tasks_per_node: 1
+    partition: devlab
+    timeout_min: 4320
+    mem_gb: 64
+    name: ${hydra.job.name}
+    _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+    submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+  sweeper:
+    _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
+    max_batch_size: null
+  help:
+    app_name: ${hydra.job.name}
+    header: '${hydra.help.app_name} is powered by Hydra.
+
+      '
+    footer: 'Powered by Hydra (https://hydra.cc)
+
+      Use --hydra-help to view Hydra specific help
+
+      '
+    template: '${hydra.help.header}
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (group=option)
+
+
+      $APP_CONFIG_GROUPS
+
+
+      == Config ==
+
+      Override anything in the config (foo.bar=value)
+
+
+      $CONFIG
+
+
+      ${hydra.help.footer}
+
+      '
+  hydra_help:
+    template: 'Hydra (${hydra.runtime.version})
+
+      See https://hydra.cc for more info.
+
+
+      == Flags ==
+
+      $FLAGS_HELP
+
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (For example, append hydra/job_logging=disabled
+      to command line)
+
+
+      $HYDRA_CONFIG_GROUPS
+
+
+      Use ''--cfg hydra'' to Show the Hydra config.
+
+      '
+    hydra_help: ???
+  hydra_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][HYDRA] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+    root:
+      level: INFO
+      handlers:
+      - console
+    loggers:
+      logging_example:
+        level: DEBUG
+    disable_existing_loggers: false
+  job_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][%(name)s][%(levelname)s] - %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+      file:
+        class: logging.FileHandler
+        formatter: simple
+        filename: ${hydra.job.name}.log
+    root:
+      level: INFO
+      handlers:
+      - console
+      - file
+    disable_existing_loggers: false
+  env: {}
+  searchpath: []
+  callbacks: {}
+  output_subdir: .hydra
+  overrides:
+    hydra:
+    - hydra/output=slurm
+    - hydra/launcher=slurm
+    task:
+    - env_args.from_pixels=False
+    - algos=sac
+    - env=elbow1D6MRandom-v0
+    - seed=11
+  job:
+    name: launcher_vrl
+    override_dirname: algos=sac,env=elbow1D6MRandom-v0,env_args.from_pixels=False,seed=11
+    id: '45447159_15'
+    num: 15
+    config_name: vrl_config
+    env_set: {}
+    env_copy: []
+    config:
+      override_dirname:
+        kv_sep: '='
+        item_sep: ','
+        exclude_keys: []
+  runtime:
+    version: 1.1.0
+    cwd: /private/home/vikashplus/Libraries/visualrl_benchmark
+    config_sources:
+    - path: hydra_plugins.fair_cluster.conf
+      schema: pkg
+      provider: fair-cluster-defaults
+    - path: hydra.conf
+      schema: pkg
+      provider: hydra
+    - path: /private/home/vikashplus/Libraries/visualrl_benchmark/config
+      schema: file
+      provider: main
+    - path: hydra_plugins.fairtask.conf
+      schema: pkg
+      provider: fairtask
+    - path: ''
+      schema: structured
+      provider: schema
+    choices:
+      algos: sac
+      hydra/env: default
+      hydra/callbacks: null
+      hydra/job_logging: default
+      hydra/hydra_logging: default
+      hydra/hydra_help: default
+      hydra/help: default
+      hydra/sweeper: basic
+      hydra/launcher: slurm
+      hydra/output: slurm
+  verbose: false
