@@ -3,7 +3,7 @@
 ## Results
 Comparision: V0.5 vs V0.4
 - [Final performance comparision](FinalPerf-NPG.pdf)
-- [Training curves comparision](TrainPerf-NPG.pdf)
+- [Training curves comparision](TrainPerf-NPG.png)
 
 ## Known Issues
 - NA
