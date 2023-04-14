@@ -9,10 +9,10 @@ seed              :   123
 sample_mode       :   trajectories
 rl_num_traj       :   96
 rl_num_samples    :   0                 # will be ignored when sample_mode=trajectories
-num_cpu           :   16
+num_cpu           :   10
 rl_num_iter       :   5001
 save_freq         :   50
-eval_rollouts     :   16
+eval_rollouts     :   100
 exp_notes         :   "<J6:v0.5baselines. J5:V0.4wrap Baseline,J04: RandomEnv ((-.5, -2.5, .8), (0.5, 0.5, 1.0))> <J03:'pelvis': ((-.005, -.005, .75), (0.005, 0.005, .9))> <J02:-100.*act_mag and low log-std><J01:-10000.*act_mag and low log-std>"
 # exp_notes         :  'V0.3 Baseline. Redo with horizon matched with MyoChallenge.'
 

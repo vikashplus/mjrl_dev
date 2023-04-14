@@ -12,7 +12,7 @@ rl_num_samples    :   0                       # will be ignored when sample_mode
 num_cpu           :   10
 rl_num_iter       :   1001
 save_freq         :   100
-eval_rollouts     :   10
+eval_rollouts     :   100
 # exp_notes         :  "J0:Adding franka_appliance class. Adding random envs. Refactor multi_task_base_v1. J2: Training DEMO_ENTRY_POINT. J3: Bugfix for horizon. J4: Sensor configs. J5: making a train to commit the baselines 5b: random_entry_point. J6> Testing new microwave position. J7: Random entry point redo post v0.2 update (serialization fix, env seed)+Franka_micro_open H 75. J5d: ENTRY_POINT = RANDOM_ENTRY_POINT. 1a0ddda (HEAD -> v0.1dev, tag: v0.1, origin/v0.1dev, origin/v0.1). J8:Baselines for v0.2 J8c: Debugging kitchen_ldoor_close-v3. Running more seeds for V0.1"
 exp_notes         :  'J4:v0.5baselines. J3:V0.4wrap Baseline J2: Pose(pos+euler) in obs and proprio, A new way to get dof_proximity. J1: Kitchen-v4 baselines post env refactors, J0: V0.4 Baseline. RandomDesk is now the entry point'
 
