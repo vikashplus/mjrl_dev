@@ -96,7 +96,7 @@ def main():
         if nenv ==-1:
             nenv = len(envs_dirs)
         else:
-            assert nenv == len(envs_dirs), "Number of envs changed"
+            assert nenv == len(envs_dirs), f"Number of envs changed {envs_dirs}"
         for env_dir in sorted(envs_dirs):
             env_labels.append(env_dir.split('/')[args.env_index])
 
@@ -108,8 +108,9 @@ def main():
 
             # all the seeds/ variations runs within the env
             yruns = []
+            xruns = [] # known bug: Logs will different lengths will cause a bug. Its hacked via using [:len(xdata)]
             for irun, run_log in enumerate(sorted(get_files(env_dir, args.run_log))):
-                print("    run> "+run_log)
+                print("    run> "+run_log, flush=True)
                 log = get_log(filename=run_log, format="csv")
 
                 # validate keys
@@ -122,6 +123,7 @@ def main():
                     xdata = log[args.xkey]
                     plot_xkey = args.xkey
                 yruns.append(log[args.ykeys])
+                # print(xdata.shape, log[args.ykeys].shape)
                 del log
 
             # stats over keys
@@ -139,9 +141,9 @@ def main():
             if args.plot_train:
                 for iykey, ykey in enumerate(sorted(args.ykeys)):
                     h_figp,_,_= simple_plot.plot(xdata=xdata,
-                            ydata=smooth_data(yruns_mean[ykey], args.smooth),
-                            errmin=yruns_min[ykey],
-                            errmax=yruns_max[ykey],
+                            ydata=smooth_data(yruns_mean[ykey][:len(xdata)], args.smooth),
+                            errmin=yruns_min[ykey][:len(xdata)],
+                            errmax=yruns_max[ykey][:len(xdata)],
                             legend=args.label[ijob],
                             subplot_id=(nenv, nykeys, nykeys*ienv+iykey+1),
                             xaxislabel=plot_xkey,

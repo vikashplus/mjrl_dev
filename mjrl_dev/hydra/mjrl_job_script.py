@@ -19,8 +19,8 @@ import json
 import gym
 import mjrl.envs
 import time as timer
-import mj_envs
-from mj_envs.envs.env_variants import register_env_variant
+import robohive
+from robohive.envs.env_variants import register_env_variant
 
 def train_loop(job_data) -> None:
 

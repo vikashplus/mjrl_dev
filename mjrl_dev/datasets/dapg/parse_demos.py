@@ -41,6 +41,7 @@ def demo_playback(env_name, demo_paths, render):
 
     for i_path, path in enumerate(demo_paths):
         # initialize
+        e.reset()
         e.set_env_state(path['init_state_dict'])
 
         # Playback
@@ -53,6 +54,7 @@ def demo_playback(env_name, demo_paths, render):
             if render:
                 e.env.mj_render()
         print(f"Trajectory{i_path}: Total rewards = {rewards}")
+        print(f"Env dt: {e.env.sim.model.opt.timestep}, Final Env.time {e.env.sim.data.time}")
     e.close()
 
 if __name__ == '__main__':
