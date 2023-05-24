@@ -1,0 +1,207 @@
+hydra:
+  run:
+    dir: ${oc.env:HOME}/${job_dir}/${job_name}${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: .
+  sweep:
+    dir: ${oc.env:HOME}/${job_dir}/${job_name}${now:%Y-%m-%d}_${now:%H-%M-%S}
+    subdir: .
+  launcher:
+    cpus_per_task: 12
+    gpus_per_node: 0
+    tasks_per_node: 1
+    timeout_min: 4320
+    mem_gb: 64
+    name: ${hydra.job.name}
+    _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.LocalLauncher
+    submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+  sweeper:
+    _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
+    max_batch_size: null
+    params: null
+  help:
+    app_name: ${hydra.job.name}
+    header: '${hydra.help.app_name} is powered by Hydra.
+
+      '
+    footer: 'Powered by Hydra (https://hydra.cc)
+
+      Use --hydra-help to view Hydra specific help
+
+      '
+    template: '${hydra.help.header}
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (group=option)
+
+
+      $APP_CONFIG_GROUPS
+
+
+      == Config ==
+
+      Override anything in the config (foo.bar=value)
+
+
+      $CONFIG
+
+
+      ${hydra.help.footer}
+
+      '
+  hydra_help:
+    template: 'Hydra (${hydra.runtime.version})
+
+      See https://hydra.cc for more info.
+
+
+      == Flags ==
+
+      $FLAGS_HELP
+
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (For example, append hydra/job_logging=disabled
+      to command line)
+
+
+      $HYDRA_CONFIG_GROUPS
+
+
+      Use ''--cfg hydra'' to Show the Hydra config.
+
+      '
+    hydra_help: ???
+  hydra_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][HYDRA] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+    root:
+      level: INFO
+      handlers:
+      - console
+    loggers:
+      logging_example:
+        level: DEBUG
+    disable_existing_loggers: false
+  job_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][%(name)s][%(levelname)s] - %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+      file:
+        class: logging.FileHandler
+        formatter: simple
+        filename: ${hydra.runtime.output_dir}/${hydra.job.name}.log
+    root:
+      level: INFO
+      handlers:
+      - console
+      - file
+    disable_existing_loggers: false
+  env: {}
+  mode: MULTIRUN
+  searchpath: []
+  callbacks: {}
+  output_subdir: .hydra
+  overrides:
+    hydra:
+    - hydra/output=self
+    - hydra/launcher=self
+    - hydra.mode=MULTIRUN
+    task:
+    - env=DKittyOrientRandom-v0
+    - job_dir=Projects/robohive/quads/dkitty
+    - job_name=J2d_orientRandom
+    - init_log_std=-.40
+  job:
+    name: ${env}
+    chdir: null
+    override_dirname: env=DKittyOrientRandom-v0,init_log_std=-.40,job_dir=Projects/robohive/quads/dkitty,job_name=J2d_orientRandom
+    id: ???
+    num: ???
+    config_name: hydra_quads_config.yaml
+    env_set: {}
+    env_copy: []
+    config:
+      override_dirname:
+        kv_sep: '='
+        item_sep: ','
+        exclude_keys: []
+  runtime:
+    version: 1.3.2
+    version_base: '1.1'
+    cwd: /home/robopen/Libraries/mjrl_dev/mjrl_dev/hydra
+    config_sources:
+    - path: hydra.conf
+      schema: pkg
+      provider: hydra
+    - path: /home/robopen/Libraries/mjrl_dev/mjrl_dev/hydra/config
+      schema: file
+      provider: main
+    - path: ''
+      schema: structured
+      provider: schema
+    output_dir: ???
+    choices:
+      hydra/env: default
+      hydra/callbacks: null
+      hydra/job_logging: default
+      hydra/hydra_logging: default
+      hydra/hydra_help: default
+      hydra/help: default
+      hydra/sweeper: basic
+      hydra/launcher: self
+      hydra/output: self
+  verbose: false
+default:
+- override hydra/output: self
+- override hydra/launcher: self
+env: DKittyOrientRandom-v0
+algorithm: NPG
+seed: 123
+sample_mode: trajectories
+rl_num_traj: 96
+rl_num_samples: 0
+num_cpu: 12
+rl_num_iter: 20001
+save_freq: 100
+eval_rollouts: 24
+exp_notes: 'J2d: Target angles now are (-np.pi/6, 2*np.pi/3) J2c: Heading was too
+  -ve. trying 5(1+heading). upright2, failling100. J2b: Less done penalty. J2a: Orient
+  init. Ported from Robel (not roel dev). J0e: Root pos in world co-ordiante. J0d:
+  H 160, automatic distance computation for bonus (dk_target_dist_cost: 4.0, dk_upright:
+  1.0, dk_falling: 100.0, dk_heading: 2.0, dk_height: 0.5) J0c: boosting rewards for
+  target error to 10. J0b: lower penalty on upright and height'
+policy_size: (64, 64)
+init_log_std: -0.4
+min_log_std: -2.0
+vf_hidden_size: (128, 128)
+vf_batch_size: 64
+vf_epochs: 2
+vf_learn_rate: 0.001
+rl_step_size: 0.05
+rl_gamma: 0.995
+rl_gae: 0.97
+alg_hyper_params:
+  device: cpu
+job_dir: Projects/robohive/quads/dkitty
+job_name: J2d_orientRandom
+suite_name: quads
+wandb_params:
+  use_wandb: true
+  wandb_user: vikashplus
+  wandb_project: quads
+  wandb_exp: ${job_name}
