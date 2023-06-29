@@ -9,7 +9,10 @@ V0.5 (3 seeds + Comparision wrt V0.4)
 - [Training curves](TrainPerf-NPG.pdf)
 
 ## Known Issues
-- N/A
+1. *`ee_pose` is [leaking privileged information](https://github.com/vikashplus/robohive/commit/93bc43b959a36ba2f6b3ede8a29ea615d3501f55#r120011298)*: A change was introduced to add randomization in the kitchen envs by making the franka_base reposition wrt to the kitchen at every reset.
+    - BUG: In our observations, ee_pos is present which provides global information about the grippers thereby also revealing the relative location between the kitchen and the robot.
+    - IMPLICATIONS: For state-based envs, this isn't as problematic. But for visual envs, this is quite problematic as the information that is required for visual generalization is being leaked by the ee_pose.
+    - FIX: The proposed fix is to update the ee_pose to provide values relative to the Franka robot's base, instead of the global ee_pose
 
 ## Hashes
 ```
